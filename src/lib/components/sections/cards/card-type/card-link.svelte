@@ -35,32 +35,32 @@
 		href={`${validLink}`}
 		target="_blank"
 		class={cn(
-			'animate-touch flex items-center gap-[1.1875rem]  rounded-lg px-4  py-3 md:px-[1.375rem] md:py-[1.125rem]',
+			'animate-touch flex items-center gap-[1rem]  rounded-lg px-4  py-3 md:px-[1.375rem] md:py-[1.125rem]',
 			isColor ? 'bg-white/20' : 'bg-white dark:bg-[#1B1B1B]'
 		)}
 	>
 		{#if isColor}
 			<img
 				src={light}
-				class="h-[43px] w-[43px] md:h-[56px] md:w-[56px]"
+				class="h-[48px] w-[48px] md:h-[56px] md:w-[56px]"
 				alt={src}
-				width="43"
-				height="43"
+				width="48"
+				height="48"
 			/>
 		{:else}
 			<img
 				src={light}
-				class="h-[43px] w-[43px] dark:hidden md:h-[56px] md:w-[56px]"
+				class="h-[48px] w-[48px] dark:hidden md:h-[56px] md:w-[56px]"
 				alt={src}
-				width="43"
-				height="43"
+				width="48"
+				height="48"
 			/>
 			<img
 				src={dark}
-				class="hidden h-[43px] w-[43px] dark:block md:h-[56px] md:w-[56px]"
+				class="hidden h-[48px] w-[48px] dark:block md:h-[56px] md:w-[56px]"
 				alt={src}
-				width="43"
-				height="43"
+				width="48"
+				height="48"
 			/>
 		{/if}
 		<div
@@ -69,12 +69,12 @@
 				isColor ? 'text-white' : 'text-black dark:text-white'
 			)}
 		>
-			<h2 class="text-base leading-4 md:text-xl md:leading-5">
+			<h2 class="text-[1.06rem] leading-4 md:text-xl md:leading-5">
 				{src}
 			</h2>
 			<h3
 				class={cn(
-					'text-[0.688rem] font-light leading-[0.688rem] md:text-sm md:leading-[0.875rem] ',
+					'text-[0.75rem] font-light leading-[0.75rem] md:text-sm md:leading-[0.875rem] ',
 					isColor ? 'text-white/70' : 'text-black/70 dark:text-white/70'
 				)}
 			>
@@ -94,25 +94,25 @@
 		{#if isColor}
 			<img
 				src={light}
-				class="h-[43px] w-[43px] md:h-[56px] md:w-[56px]"
+				class="h-[48px] w-[48px] md:h-[56px] md:w-[56px]"
 				alt={src}
-				width="43"
-				height="43"
+				width="48"
+				height="48"
 			/>
 		{:else}
 			<img
 				src={light}
-				class="h-[43px] w-[43px] dark:hidden md:h-[56px] md:w-[56px]"
+				class="h-[48px] w-[48px] dark:hidden md:h-[56px] md:w-[56px]"
 				alt={src}
-				width="43"
-				height="43"
+				width="48"
+				height="48"
 			/>
 			<img
 				src={dark}
-				class="hidden h-[43px] w-[43px] dark:block md:h-[56px] md:w-[56px]"
+				class="hidden h-[48px] w-[48px] dark:block md:h-[56px] md:w-[56px]"
 				alt={src}
-				width="43"
-				height="43"
+				width="48"
+				height="48"
 			/>
 		{/if}
 
@@ -122,12 +122,12 @@
 				isColor ? 'text-white' : 'text-black dark:text-white'
 			)}
 		>
-			<h2 class="text-base leading-4 md:text-xl md:leading-5">
+			<h2 class="text-[1.06rem] leading-4 md:text-xl md:leading-5">
 				{src}
 			</h2>
 			<h3
 				class={cn(
-					'text-[0.688rem] font-light leading-[0.688rem] md:text-sm md:leading-[0.875rem] ',
+					'text-[0.75rem] font-light leading-[0.75rem] md:text-sm md:leading-[0.875rem] ',
 					isColor ? 'text-white/70' : 'text-black/70 dark:text-white/70'
 				)}
 			>
