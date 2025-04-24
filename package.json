@@ -45,6 +45,7 @@
 		"@lottiefiles/dotlottie-svelte": "^0.4.6",
 		"@tailwindcss/container-queries": "^0.1.1",
 		"@tailwindcss/typography": "^0.5.15",
+		"@vercel/speed-insights": "^1.2.0",
 		"firebase": "^11.0.2"
 	},
 	"pnpm": {
