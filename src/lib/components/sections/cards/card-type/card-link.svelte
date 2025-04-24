@@ -1,0 +1,138 @@
+<script lang="ts">
+	import { getIcons } from '$lib/hooks/icons';
+	import { cn } from '$lib/utils';
+
+	let {
+		src,
+		detail,
+		link,
+		isColor
+	}: {
+		src: string;
+		detail: string;
+		link: string;
+		isColor: boolean;
+	} = $props();
+
+	const validLink = $derived.by(() => {
+		if (src === 'Link') return `//${detail}`;
+		if (src === 'Email' || src === 'Gmail') return `mailto:${detail}`;
+		if (src === 'Phone' || src === 'Phone number') return `tel:${detail}`;
+		if (link) return `${link}${detail}`;
+		if (link === '') return '';
+	});
+
+	const haveAt = $derived.by(() => {
+		if (src === 'Whatsapp number') return '+';
+		if (link) return '@';
+	});
+
+	const [light, dark] = getIcons(src);
+</script>
+
+{#if validLink}
+	<a
+		href={`${validLink}`}
+		target="_blank"
+		class={cn(
+			'animate-touch flex items-center gap-[1.1875rem]  rounded-lg px-4  py-3 md:px-[1.375rem] md:py-[1.125rem]',
+			isColor ? 'bg-white/20' : 'bg-white dark:bg-[#1B1B1B]'
+		)}
+	>
+		{#if isColor}
+			<img
+				src={light}
+				class="h-[43px] w-[43px] md:h-[56px] md:w-[56px]"
+				alt={src}
+				width="43"
+				height="43"
+			/>
+		{:else}
+			<img
+				src={light}
+				class="h-[43px] w-[43px] dark:hidden md:h-[56px] md:w-[56px]"
+				alt={src}
+				width="43"
+				height="43"
+			/>
+			<img
+				src={dark}
+				class="hidden h-[43px] w-[43px] dark:block md:h-[56px] md:w-[56px]"
+				alt={src}
+				width="43"
+				height="43"
+			/>
+		{/if}
+		<div
+			class={cn(
+				'flex flex-col gap-[0.375rem] ',
+				isColor ? 'text-white' : 'text-black dark:text-white'
+			)}
+		>
+			<h2 class="text-base leading-4 md:text-xl md:leading-5">
+				{src}
+			</h2>
+			<h3
+				class={cn(
+					'text-[0.688rem] font-light leading-[0.688rem] md:text-sm md:leading-[0.875rem] ',
+					isColor ? 'text-white/70' : 'text-black/70 dark:text-white/70'
+				)}
+			>
+				{haveAt}{detail}
+			</h3>
+		</div>
+	</a>
+{/if}
+
+{#if !validLink}
+	<div
+		class={cn(
+			'animate-touch flex items-center gap-[1.1875rem]  rounded-lg px-4 py-3 md:px-[1.375rem] md:py-[1.125rem]',
+			isColor ? 'bg-white/20' : 'bg-white dark:bg-[#1B1B1B]'
+		)}
+	>
+		{#if isColor}
+			<img
+				src={light}
+				class="h-[43px] w-[43px] md:h-[56px] md:w-[56px]"
+				alt={src}
+				width="43"
+				height="43"
+			/>
+		{:else}
+			<img
+				src={light}
+				class="h-[43px] w-[43px] dark:hidden md:h-[56px] md:w-[56px]"
+				alt={src}
+				width="43"
+				height="43"
+			/>
+			<img
+				src={dark}
+				class="hidden h-[43px] w-[43px] dark:block md:h-[56px] md:w-[56px]"
+				alt={src}
+				width="43"
+				height="43"
+			/>
+		{/if}
+
+		<div
+			class={cn(
+				'flex flex-col gap-[0.375rem] ',
+				isColor ? 'text-white' : 'text-black dark:text-white'
+			)}
+		>
+			<h2 class="text-base leading-4 md:text-xl md:leading-5">
+				{src}
+			</h2>
+			<h3
+				class={cn(
+					'text-[0.688rem] font-light leading-[0.688rem] md:text-sm md:leading-[0.875rem] ',
+					isColor ? 'text-white/70' : 'text-black/70 dark:text-white/70'
+				)}
+			>
+				{haveAt}{detail}
+			</h3>
+		</div>
+	</div>
+{/if}
