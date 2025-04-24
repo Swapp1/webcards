@@ -93,18 +93,6 @@
 	font-weight: 600;
 }
 
-@font-face {
-	font-family: 'SofiaPro';
-	src: url('/fonts/SofiaPro-Bold.ttf');
-	font-weight: 700;
-}
-
-@font-face {
-	font-family: 'SofiaPro';
-	src: url('/fonts/SofiaPro-Black.ttf');
-	font-weight: 900;
-}
-
 @layer base {
 	* {
 		@apply border-border;
