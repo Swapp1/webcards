@@ -3,7 +3,7 @@
 </script>
 
 <footer
-	class="flex w-full flex-col items-center justify-center py-4 font-['Poppins'] sm:pb-0 sm:pt-6"
+	class="flex w-full flex-col items-center justify-center py-4 sm:pb-0 sm:pt-6"
 	style:color={isColor ? 'white' : 'hsl(var(--text))'}
 >
 	<p class="text-[0.8125rem] font-medium leading-[1.125rem] tracking-[0.0125rem]">
