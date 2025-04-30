@@ -5,5 +5,6 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	assetsInclude : [
 		'src/lib/assets/**',
-	]
+	],
+	publicDir: 'public',
 });
