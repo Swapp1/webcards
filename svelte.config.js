@@ -8,11 +8,6 @@ const config = {
     adapter: vercel(),
     alias: {
       "@/*": "src/lib/*"
-    },
-    routes: {
-      exclude: [
-        'public/**'
-      ]
     }
   }
 };
