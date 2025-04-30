@@ -8,6 +8,9 @@ const config = {
     adapter: vercel(),
     alias: {
       "@/*": "src/lib/*"
+    },
+    files: {
+      assets: 'public'
     }
   }
 };
