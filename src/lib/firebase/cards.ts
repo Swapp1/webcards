@@ -13,6 +13,7 @@ export const getCardsAccordingByOwnerId = async (id: string) => {
 }
 
 export const getSpecificCard = async (id: string) => {
-    const cards = (await getDoc(doc(db, 'cards', id)))
-    return cards
+    const q = query(collection(db, 'cards'), where('personalizedLink', '==', id));
+    const cards = await getDocs(q);
+    return cards;
 }

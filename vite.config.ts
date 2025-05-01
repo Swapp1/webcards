@@ -6,5 +6,4 @@ export default defineConfig({
 	assetsInclude : [
 		'src/lib/assets/**',
 	],
-	publicDir: 'public',
 });

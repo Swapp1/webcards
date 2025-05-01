@@ -2,18 +2,16 @@ import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { getSpecificCard } from '$lib/firebase';
 
-
 export const load: PageLoad = async ({ params }) => {
-
     const cardDetails = await getSpecificCard(params.id)
 
-    if (cardDetails.exists()) {
+    if (!cardDetails.empty) {
+
+        const doc = cardDetails.docs[0];
         return {
             params: params.id,
-            card: cardDetails.data(),
+            card: doc.data(),
         }
     }
-
-    error(404, 'Not found');
-
+    throw error(404, 'Not found');
 };
