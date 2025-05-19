@@ -76,7 +76,7 @@
 				isColor ? 'text-white/70' : 'text-black/70 dark:text-white/70'
 			)}
 		>
-			{haveAt}{detail}
+			{haveAt}{src === 'Link' ? link : detail}
 		</h3>
 	</div>
 </a>
