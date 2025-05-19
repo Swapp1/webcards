@@ -104,12 +104,12 @@
 	}
 
 	.animate-touch {
-		@apply transition-transform duration-150 ease-in-out active:scale-[0.96]
+		@apply transition-transform duration-150 ease-in-out active:scale-[0.98]
 	}
 
 	@media (hover: hover) {
 		.animate-touch {
-			@apply hover:scale-[0.98];
+			@apply hover:scale-[0.99];
 		}
 	}
 }
