@@ -21,7 +21,7 @@
 </a>
 
   <!-- Liens séparés par un trait vertical, texte agrandi -->
-<div class="flex items-center text-sm font-light leading-snug tracking-wide text-gray-200">
+<div class="flex items-center text-sm font-light leading-snug tracking-wide text-gray-300">
 	<a
 		href="https://www.swapp.fr/terms"
 		target="_blank"
