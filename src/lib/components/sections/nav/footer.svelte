@@ -31,7 +31,7 @@
 	</a>
 	<div class="h-3 border-l border-current"></div>
 	<a
-		href="https://www.swapp.fr/privacypolicy"
+		href="https://www.swapp.fr/privacy_policy"
 		target="_blank"
 		class="px-1"
 	>
