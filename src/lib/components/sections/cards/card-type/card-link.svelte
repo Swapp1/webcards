@@ -28,6 +28,7 @@
 
 	const haveAt = $derived.by(() => {
 		if (src === 'Whatsapp number') return '';
+		if (src === 'Link') return '';
 		if (link) return '@';
 	});
 
