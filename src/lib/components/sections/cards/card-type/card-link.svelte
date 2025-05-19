@@ -16,9 +16,9 @@
 
 	const validLink = $derived.by(() => {
 		if (src === 'Link') {
-    		return detail.match(/^[a-z][a-z0-9+.-]*:\/\//i)
-      		? detail
-      		: `https://${detail}`;
+    		return link.match(/^[a-z][a-z0-9+.-]*:\/\//i)
+      		? link
+      		: `https://${link}`;
 		}
 		if (src === 'Email' || src === 'Gmail') return `mailto:${detail}`;
 		if (src === 'Phone' || src === 'Phone number') return `tel:${detail}`;
@@ -67,7 +67,9 @@
 			isColor ? 'text-white' : 'text-black dark:text-white'
 		)}
 	>
-		<h2 class="text-[1.06rem] leading-4 md:text-xl md:leading-5">{src}</h2>
+		<h2 class="text-[1.06rem] leading-4 md:text-xl md:leading-5">
+			{src === 'Link' ? detail : src}
+		</h2>
 		<h3
 			class={cn(
 				'text-[0.75rem] font-light leading-[0.75rem] md:text-sm md:leading-[0.875rem]',

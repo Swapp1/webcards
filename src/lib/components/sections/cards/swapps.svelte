@@ -54,9 +54,9 @@
 	{:else if swapp.title === 'Link'}
 		<CardLink
 			{isColor}
-			src={swapp.extras.linkName}
-			detail={swapp.detail}
-			link={swapp.link}
+			src={swapp.title}
+			detail={swapp.extras?.linkName}
+			link={swapp.detail}
 		/>
 	{:else}
 		<CardLink {isColor} src={swapp.title} detail={swapp.detail} link={swapp.link} />
