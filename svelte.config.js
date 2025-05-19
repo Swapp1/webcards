@@ -9,9 +9,6 @@ const config = {
     alias: {
       "@/*": "src/lib/*"
     },
-    files: {
-      assets: 'public'
-    }
   }
 };
 
