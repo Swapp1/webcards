@@ -44,6 +44,13 @@
 			detail={swapp.detail}
 			link={swapp.extras.attachmentFilePath}
 		/>
+	{:else if swapp.title === 'Phone number'}
+    	<CardLink
+      		{isColor}
+      		src={swapp.title}
+      		detail={`${swapp.extras?.countryCode ?? ''}${swapp.detail}`}
+      		link={swapp.link}
+    	/>
 	{:else}
 		<CardLink {isColor} src={swapp.title} detail={swapp.detail} link={swapp.link} />
 	{/if}
