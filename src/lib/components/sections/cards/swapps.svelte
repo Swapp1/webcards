@@ -51,6 +51,13 @@
       		detail={`${swapp.extras?.countryCode ?? ''}${swapp.detail}`}
       		link={swapp.link}
     	/>
+	{:else if swapp.title === 'Link'}
+		<CardLink
+			{isColor}
+			src={swapp.extras.linkName}
+			detail={swapp.detail}
+			link={swapp.link}
+		/>
 	{:else}
 		<CardLink {isColor} src={swapp.title} detail={swapp.detail} link={swapp.link} />
 	{/if}
