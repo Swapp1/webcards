@@ -14,7 +14,7 @@
 	import FloatingBtn from '$lib/components/sections/nav/floating-btn.svelte';
 	import Footer from '$lib/components/sections/nav/footer.svelte';
 
-	import DrawerIcon from '$lib/assets/drawer-icon.svg';
+	import DrawerIcon from '$lib/assets/add-contact.svg';
 	import ActionBtn from '$lib/components/sections/cards/action-btn.svelte';
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import { argbToRgba } from '$lib/hooks/icons';
@@ -187,10 +187,10 @@
 					}}
 				/>
 
-				<div class="absolute top-5 flex w-full items-end justify-between px-4 sm:justify-center">
+				<div class="absolute top-5 flex w-full items-center justify-between px-4 sm:justify-center">
 					<Drawer.Root shouldScaleBackground>
 						<Drawer.Trigger class="sm:hidden">
-							<img src={DrawerIcon} alt="Icon" width={34} height={34} class="h-[34px] w-[34px]" />
+							<img src={DrawerIcon} alt="Icon" width={25} height={25} class="h-[25px] w-[25px]" />
 						</Drawer.Trigger>
 						<Drawer.Portal>
 							<Drawer.Overlay class="fixed inset-0 bg-black/40" />

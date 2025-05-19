@@ -1,18 +1,41 @@
 <script lang="ts">
-	let { isColor }: { isColor: boolean } = $props();
+  let { isColor }: { isColor: boolean } = $props();
 </script>
 
 <footer
-	class="flex w-full flex-col items-center justify-center py-4 sm:pb-0 sm:pt-6"
-	style:color={isColor ? 'white' : 'hsl(var(--text))'}
+  class="flex flex-col items-center justify-center pt-10 pb-20"
+  style="color: {isColor ? 'white' : 'hsl(var(--text))'}"
 >
-	<p class="text-[0.8125rem] font-medium leading-[1.125rem] tracking-[0.0125rem]">
-		Powered by <span class="text-[#F85510]">Swapp</span>
+  <!-- Logo Swapp large & rounded -->
+<a href="https://download.swapp.fr" target="_blank" class="flex flex-col items-center">
+	<img
+		src="/swapp.svg"
+		alt="Swapp logo"
+		class="h-7 w-auto rounded-[0.4rem] mb-2"
+	/>
+
+	<!-- Texte d'appel plus grand -->
+	<p class="text-[1rem] font-semibold leading-tight mb-4">
+		Create your card
 	</p>
-	<div
-		class="flex w-full items-center justify-between text-[0.625rem] font-light leading-[1.125rem] tracking-[0.0125rem]"
+</a>
+
+  <!-- Liens séparés par un trait vertical, texte agrandi -->
+<div class="flex items-center text-sm font-light leading-snug tracking-wide text-gray-200">
+	<a
+		href="https://www.swapp.fr/terms"
+		target="_blank"
+		class="px-1"
 	>
-		<a href="https://www.swapp.fr/privacypolicy" target="_blank">Privacy policy</a>
-		<a href="https://www.swapp.fr/terms" target="_blank">Terms & conditions</a>
-	</div>
+		Terms
+	</a>
+	<div class="h-3 border-l border-current"></div>
+	<a
+		href="https://www.swapp.fr/privacypolicy"
+		target="_blank"
+		class="px-1"
+	>
+		Privacy policy
+	</a>
+</div>
 </footer>
