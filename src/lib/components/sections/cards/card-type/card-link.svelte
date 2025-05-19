@@ -64,7 +64,7 @@
 	{/if}
 	<div
 		class={cn(
-			'flex flex-col gap-[0.375rem]',
+			'flex flex-col gap-[0.375rem] flex-1 min-w-0',
 			isColor ? 'text-white' : 'text-black dark:text-white'
 		)}
 	>
@@ -73,7 +73,7 @@
 		</h2>
 		<h3
 			class={cn(
-				'text-[0.75rem] font-light leading-[0.75rem] md:text-sm md:leading-[0.875rem]',
+				'truncate text-[0.75rem] font-light leading-[0.75rem] md:text-sm md:leading-[0.875rem]',
 				isColor ? 'text-white/70' : 'text-black/70 dark:text-white/70'
 			)}
 		>
