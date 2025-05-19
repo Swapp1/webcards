@@ -106,10 +106,10 @@
 }
 
 @layer base {
-	/* * {
+	* {
 		@apply border-border;
-		/* scrollbar-width: none; 
-	} */
+		/* scrollbar-width: none; */
+	}
 
 	body {
 		@apply font-sofia text-black dark:text-white;
