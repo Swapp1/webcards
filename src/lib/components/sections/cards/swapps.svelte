@@ -44,7 +44,7 @@
 			detail={swapp.detail}
 			link={swapp.extras.attachmentFilePath}
 		/>
-	{:else if swapp.title === 'Phone number'}
+	{:else if swapp.type === 'phoneNumber'}
     	<CardLink
       		{isColor}
       		src={swapp.title}
