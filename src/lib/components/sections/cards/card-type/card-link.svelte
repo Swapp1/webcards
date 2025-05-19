@@ -15,7 +15,11 @@
 	} = $props();
 
 	const validLink = $derived.by(() => {
-		if (src === 'Link') return `${detail}`;
+		if (src === 'Link') {
+    		return detail.match(/^[a-z][a-z0-9+.-]*:\/\//i)
+      		? detail
+      		: `https://${detail}`;
+		}
 		if (src === 'Email' || src === 'Gmail') return `mailto:${detail}`;
 		if (src === 'Phone' || src === 'Phone number') return `tel:${detail}`;
 		if (link) return `${link}${detail}`;
