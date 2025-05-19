@@ -71,25 +71,25 @@
 
 @font-face {
 	font-family: 'SofiaPro';
-	src: url('/fonts/SofiaPro-Light.ttf');
+	src: url('/fonts/SofiaPro-Light.woff2');
 	font-weight: 300;
 }
 
 @font-face {
 	font-family: 'SofiaPro';
-	src: url('/fonts/SofiaPro-Regular.ttf');
+	src: url('/fonts/SofiaPro-Regular.woff2');
 	font-weight: 400;
 }
 
 @font-face {
 	font-family: 'SofiaPro';
-	src: url('/fonts/SofiaPro-Medium.ttf');
+	src: url('/fonts/SofiaPro-Medium.woff2');
 	font-weight: 500;
 }
 
 @font-face {
 	font-family: 'SofiaPro';
-	src: url('/fonts/SofiaPro-SemiBold.otf');
+	src: url('/fonts/SofiaPro-SemiBold.woff2');
 	font-weight: 600;
 }
 
