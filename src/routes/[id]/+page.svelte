@@ -17,7 +17,7 @@
 	import DrawerIcon from '$lib/assets/add-contact.svg';
 	import ActionBtn from '$lib/components/sections/cards/action-btn.svelte';
 	import Badge from '$lib/components/ui/badge/badge.svelte';
-	import { argbToRgba } from '$lib/hooks/icons';
+	import { argbToHex, hexToRgba } from '$lib/hooks/icons';
 	import { tick } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -57,12 +57,12 @@
 
 	$effect(() => {
 		document.body.style.background = coloredBg
-			? `${argbToRgba(coloredBg)}`
+			? `${argbToHex(coloredBg)}`
 			: 'hsl(var(--background))';
 
 		document.body.style.setProperty(
 			'--action-drawer',
-			`${coloredBg ? `${argbToRgba(coloredBg)}` : 'white'}`
+			`${coloredBg ? `${argbToHex(coloredBg)}` : 'white'}`
 		);
 	});
 
@@ -147,7 +147,7 @@
 	</div>
 {/if}
 
-<div class={cn('relative flex w-full justify-center sm:h-screen sm:overflow-hidden ')}>
+<div class={cn('relative flex w-full justify-center sm:h-screen sm:overflow-hidden')}>
 	<img
 		src={card.profilePicture}
 		alt={card.displayName}
@@ -225,26 +225,39 @@
 					<Logo className="sm:hidden" />
 				</div>
 
-				<CardInfo
-					title={card.displayName}
-					{isCardPersonal}
-					heading={isCardPersonal
-						? card.heading
-						: card.professionalCardType === 'student'
-							? `${card.schoolMajor} at ${card.schoolName}`
-							: card.professionalCardType === 'staff'
-								? `${card.jobTitle} at ${card.company}`
-								: card.heading}
-					companyLink={card.companyLink}
-					companyName={card.company}
-					companyLogo={card.companyLogo}
-					skills={card.keySkills}
-					bio={card.bio}
-				/>
+				{#if isCardPersonal && card.cardDesignType === 'centered'}
+					<div
+						class="absolute bottom-0 flex h-fit min-h-[150px] w-full flex-col items-center justify-center gap-2 px-6 pb-11 pt-[100vh] text-white md:px-9 md:pb-12"
+						style:background={`linear-gradient(180deg, ${hexToRgba(argbToHex(coloredBg), 0)} 75%, ${hexToRgba(argbToHex(coloredBg), 0.9)} 90%, ${hexToRgba(argbToHex(coloredBg), 1)} 95%);`}
+					>
+						<span
+							class="font-sf-pro-display text-[2.5rem] font-black italic leading-[100%] tracking-[1px]"
+							>{card.displayName}</span
+						>
+						<p class="text-sm font-medium">{card.heading}</p>
+					</div>
+				{:else}
+					<CardInfo
+						title={card.displayName}
+						{isCardPersonal}
+						heading={isCardPersonal
+							? card.heading
+							: card.professionalCardType === 'student'
+								? `${card.schoolMajor} at ${card.schoolName}`
+								: card.professionalCardType === 'staff'
+									? `${card.jobTitle} at ${card.company}`
+									: card.heading}
+						companyLink={card.companyLink}
+						companyName={card.company}
+						companyLogo={card.companyLogo}
+						skills={card.keySkills}
+						bio={card.bio}
+					/>
+				{/if}
 			</section>
 
 			<div
-				class={cn('absolute flex  w-full flex-col justify-between gap-2  rounded-t-[1.25rem]')}
+				class={cn('absolute flex w-full flex-col justify-between gap-2  rounded-t-[1.25rem]')}
 				style:top={windowWidth >= 768 ? `${imgHeight - 30}px` : `${imgHeight - 24}px`}
 				style:height={windowWidth >= 640
 					? isCardScrollable
@@ -258,10 +271,13 @@
 				<div
 					bind:this={cardScrollElement}
 					class={cn(
-						'flex h-full w-full flex-col justify-between gap-2 rounded-t-[1.25rem] px-5 py-6 sm:min-h-full md:gap-[0.625rem] md:rounded-t-[1.875rem]    md:px-9 md:pb-5 md:pt-[1.875rem]',
-						isCardScrollable ? 'sm:rounded-b-[1.25rem]' : 'sm:rounded-b-0'
+						'flex h-full w-full flex-col justify-between gap-2 px-5 py-6 sm:min-h-full md:gap-[0.625rem] md:px-9 md:pb-5 md:pt-[1.875rem]',
+						isCardScrollable ? 'sm:rounded-b-[1.25rem]' : 'sm:rounded-b-0',
+						card.cardDesignType === 'centered'
+							? 'rounded-t-none'
+							: 'rounded-t-[1.25rem] md:rounded-t-[1.875rem]'
 					)}
-					style:background={coloredBg ? `${argbToRgba(coloredBg)}` : 'hsl(var(--background))'}
+					style:background={coloredBg ? `${argbToHex(coloredBg)}` : 'hsl(var(--background))'}
 				>
 					<Swapps swapps={card.swapps} isColor={coloredBg} />
 					<Footer isColor={coloredBg} />

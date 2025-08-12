@@ -23,7 +23,7 @@
 	{:else if ['Header', 'Title'].includes(swapp.title)}
 		<h3
 			class={cn(
-				' pb-1 pt-6 text-[1.375rem] font-semibold leading-[1.375rem] md:text-3xl md:font-medium md:leading-[1.875rem]',
+				' font-sf-pro-display pb-1 pt-6 text-[1.375rem] font-semibold leading-[1.375rem] md:text-3xl md:font-medium md:leading-[1.875rem]',
 				isColor && 'text-white'
 			)}
 		>
@@ -45,19 +45,14 @@
 			link={swapp.extras.attachmentFilePath}
 		/>
 	{:else if swapp.type === 'phoneNumber'}
-    	<CardLink
-      		{isColor}
-      		src={swapp.title}
-      		detail={`${swapp.extras?.countryCode ?? ''}${swapp.detail}`}
-      		link={swapp.link}
-    	/>
-	{:else if swapp.title === 'Link'}
 		<CardLink
 			{isColor}
 			src={swapp.title}
-			detail={swapp.extras?.linkName}
-			link={swapp.detail}
+			detail={`${swapp.extras?.countryCode ?? ''}${swapp.detail}`}
+			link={swapp.link}
 		/>
+	{:else if swapp.title === 'Link'}
+		<CardLink {isColor} src={swapp.title} detail={swapp.extras?.linkName} link={swapp.detail} />
 	{:else}
 		<CardLink {isColor} src={swapp.title} detail={swapp.detail} link={swapp.link} />
 	{/if}

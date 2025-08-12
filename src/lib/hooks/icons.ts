@@ -36,7 +36,7 @@ export function getAllIcons() {
 
 
 
-export function argbToRgba(argb: number | string): string {
+export function argbToHex(argb: number | string): string {
     // If argb is a number (e.g., 0xAARRGGBB)
     if (typeof argb === 'number') {
         const alpha = ((argb >> 24) & 0xFF).toString(16).padStart(2, '0');
@@ -69,4 +69,31 @@ export function argbToRgba(argb: number | string): string {
 
     return '#FFFFFF'
 
+}
+
+export function hexToRgba(hex: string, opacity?: number): string {
+    let r = 255, g = 255, b = 255, a = 1;
+
+    // Remove '#' if present
+    hex = hex.replace(/^#/, '');
+
+    if (hex.length === 6) {
+        r = parseInt(hex.slice(0, 2), 16);
+        g = parseInt(hex.slice(2, 4), 16);
+        b = parseInt(hex.slice(4, 6), 16);
+    } else if (hex.length === 8) {
+        r = parseInt(hex.slice(0, 2), 16);
+        g = parseInt(hex.slice(2, 4), 16);
+        b = parseInt(hex.slice(4, 6), 16);
+        a = parseInt(hex.slice(6, 8), 16) / 255;
+    } else {
+        // Invalid hex, fallback to white
+        return 'rgba(255,255,255,1)';
+    }
+
+    if (typeof opacity === 'number') {
+        a = opacity;
+    }
+
+    return `rgba(${r},${g},${b},${a})`;
 }

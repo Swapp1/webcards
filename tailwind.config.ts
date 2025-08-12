@@ -73,6 +73,7 @@ const config: Config = {
 			fontFamily: {
 				sans: [...fontFamily.sans],
 				sofia: ['SofiaPro', 'sans-serif'],
+				'sf-pro-display': ['SF Pro Display', 'sans-serif'],
 			},
 			lineHeight: {
 				"100": "1.875rem"
