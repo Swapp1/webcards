@@ -142,8 +142,32 @@
 </svelte:head>
 
 {#if imgLoading}
-	<div class="fixed top-0 z-20 h-screen w-full bg-white">
-		<DotLottieSvelte src={Loader} loop autoplay />
+	<div class="fixed z-[60] h-screen w-full bg-background">
+		<div class="h-screen w-full bg-zinc-800">
+			<div class={cn('relative  flex w-full justify-center sm:h-screen sm:overflow-hidden')}>
+				<div class="flex w-full flex-col items-center scroll-smooth sm:h-screen sm:overflow-auto">
+					<hr class="hidden h-16 w-full border-0 sm:flex" />
+					<main
+						class="relative flex h-screen w-full flex-col rounded-t-[1.25rem] bg-black sm:max-w-[42.8125rem] md:rounded-t-[1.875rem]"
+					>
+						<div class="flex h-full items-center justify-center">
+							<div class="flex h-full items-center justify-center space-x-2">
+								<span class="sr-only">Loading...</span>
+								<div
+									class="bg-gray-400 h-4 w-4 animate-bounce rounded-full [animation-delay:-0.3s]"
+								></div>
+								<div
+									class="bg-gray-400 h-4 w-4 animate-bounce rounded-full [animation-delay:-0.15s]"
+								></div>
+								<div
+									class="bg-gray-400 h-4 w-4 animate-bounce rounded-full"
+								></div>
+							</div>
+						</div>
+					</main>
+				</div>
+			</div>
+		</div>
 	</div>
 {/if}
 
@@ -163,7 +187,7 @@
 		<hr class="hidden h-16 w-full border-0 sm:flex" />
 
 		<main class="relative flex h-auto w-full flex-col sm:max-w-[42.8125rem]">
-			<FloatingBtn />
+			<FloatingBtn color={coloredBg} pic={card.profilePicture} />
 
 			<section class="relative">
 				<img
