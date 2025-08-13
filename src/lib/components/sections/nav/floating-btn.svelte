@@ -49,27 +49,29 @@
 	</div>
 
 	<div
-		class="fixed bottom-6 flex-col gap-3 right-6 z-50 hidden w-[240px] items-center justify-center rounded-lg bg-white px-4 py-5 dark:bg-black lg:flex"
+		class="fixed bottom-6 right-6 z-50 hidden w-[240px] flex-col items-center justify-center gap-3 rounded-lg bg-white px-4 py-5 dark:bg-black lg:flex"
 		style:background={color && argbToHex(color)}
 	>
-		<div
-			class="flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale"
-		>
-			<Avatar.Root>
-				<Avatar.Image src={pic} alt="@User" />
-				<Avatar.Fallback>
-          <Skeleton class="h-full w-full" />
-        </Avatar.Fallback>
-			</Avatar.Root>
-			<Avatar.Root>
-				<Avatar.Image src="swapp.svg" alt="@swapp" />
-				<Avatar.Fallback>
-          <Skeleton class="h-full w-full" />
-        </Avatar.Fallback>
-			</Avatar.Root>
-		</div>
+		<a href="https://swapp.fr" target="_blank" rel="noopener noreferrer" class="flex flex-col justify-center items-center gap-3">
+			<div
+				class="flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale"
+			>
+				<Avatar.Root>
+					<Avatar.Image src={pic} alt="@User" />
+					<Avatar.Fallback>
+						<Skeleton class="h-full w-full" />
+					</Avatar.Fallback>
+				</Avatar.Root>
+				<Avatar.Root>
+					<Avatar.Image src="swapp.svg" alt="@swapp" />
+					<Avatar.Fallback>
+						<Skeleton class="h-full w-full" />
+					</Avatar.Fallback>
+				</Avatar.Root>
+			</div>
 
-		<span class="text-sm font-semibold leading-none">Create your free card now</span>
+			<span class="text-sm font-semibold leading-none">Create your free card now</span>
+		</a>
 
 		<button class="absolute right-2 top-2" aria-label="Close" on:click={() => (visible = false)}>
 			<svg
