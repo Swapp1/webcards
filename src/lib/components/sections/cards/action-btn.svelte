@@ -111,7 +111,7 @@
 	type="button"
 	onclick={downloadVCF}
 	class={cn(
-		` rounded-lg bg-white/60 py-6 text-base font-medium text-black backdrop-blur-lg hover:bg-white dark:bg-black/20 dark:text-white hover:dark:bg-white/10 lg:bg-[#F3F3F3] lg:backdrop-blur-0`,
+		` rounded-[24px] bg-white/60 py-6 text-base font-medium text-black backdrop-blur-lg hover:bg-white dark:bg-black/20 dark:text-white hover:dark:bg-white/10 lg:bg-[#F3F3F3] lg:backdrop-blur-0`,
 		className
 	)}
 >

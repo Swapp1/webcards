@@ -16,39 +16,36 @@
 
 	const validLink = $derived.by(() => {
 		if (src === 'Link') {
-    		return link.match(/^[a-z][a-z0-9+.-]*:\/\//i)
-      		? link
-      		: `https://${link}`;
+			return link.match(/^[a-z][a-z0-9+.-]*:\/\//i) ? link : `https://${link}`;
 		}
 		if (src === 'Email' || src === 'Gmail') return `mailto:${detail}`;
 		if (src === 'Phone' || src === 'Phone number') return `tel:${detail}`;
 		if (link) return `${link}${detail}`;
-		if (link === '') return '';
+		return '';
 	});
 
-	const haveAt = $derived.by(() => {
-		if (src === 'Whatsapp number') return '';
-		if (src === 'Link') return '';
-		if (link) return '@';
-	});
+	const haveAt = $derived(
+		src !== 'Whatsapp number' && src !== 'Link' && link ? '@' : ''
+	);
+
+	const displayTitle = $derived(src === 'Link' ? detail : src);
+	const displayDetail = $derived(src === 'Link' ? link : detail);
 
 	const [light, dark] = getIcons(src);
 </script>
 
 <a
 	href={validLink || undefined}
-	target={validLink ? "_blank" : undefined}
+	target={validLink ? '_blank' : undefined}
+	rel={validLink ? 'noopener noreferrer' : undefined}
 	class={cn(
-		'animate-touch flex items-center gap-[1rem] rounded-lg px-4 py-3 md:px-[1.375rem] md:py-[1.125rem]',
+		'animate-touch flex items-center gap-4 rounded-[24px] px-4 py-3 md:px-[1.375rem] md:py-[1.125rem]',
 		isColor ? 'bg-white/20' : 'bg-white dark:bg-[#1B1B1B]'
 	)}
 >
 	<img
 		src={light}
-		class={cn(
-			'h-[48px] w-[48px] md:h-[56px] md:w-[56px]',
-			!isColor && 'dark:hidden'
-		)}
+		class={cn('h-12 w-12 md:h-14 md:w-14', !isColor && 'dark:hidden')}
 		alt={src}
 		width="48"
 		height="48"
@@ -56,7 +53,7 @@
 	{#if !isColor}
 		<img
 			src={dark}
-			class="hidden h-[48px] w-[48px] dark:block md:h-[56px] md:w-[56px]"
+			class="hidden h-12 w-12 dark:block md:h-14 md:w-14"
 			alt={src}
 			width="48"
 			height="48"
@@ -64,20 +61,20 @@
 	{/if}
 	<div
 		class={cn(
-			'flex flex-col gap-[0.375rem] flex-1 min-w-0',
+			'flex min-w-0 flex-1 flex-col gap-1.5',
 			isColor ? 'text-white' : 'text-black dark:text-white'
 		)}
 	>
 		<h2 class="text-[1.06rem] leading-4 md:text-xl md:leading-5">
-			{src === 'Link' ? detail : src}
+			{displayTitle}
 		</h2>
 		<h3
 			class={cn(
-				'truncate text-[0.75rem] font-light leading-[0.75rem] md:text-sm md:leading-[0.875rem]',
+				'truncate text-xs font-light leading-3 md:text-sm md:leading-3.5',
 				isColor ? 'text-white/70' : 'text-black/70 dark:text-white/70'
 			)}
 		>
-			{haveAt}{src === 'Link' ? link : detail}
+			{haveAt}{displayDetail}
 		</h3>
 	</div>
 </a>

@@ -12,11 +12,11 @@
 	<div
 		class="fixed bottom-2 left-1/2 z-50 flex
            w-[96%] max-w-md -translate-x-1/2 transform
-           items-center justify-between rounded-lg
-           bg-white px-3 py-2 text-black shadow lg:hidden"
+           items-center justify-between rounded-[16px]
+           bg-white/50 px-3 py-2 text-black shadow backdrop-blur-[40px] lg:hidden"
 	>
 		<!-- Zone cliquable entière sauf la croix -->
-		<a href="https://download.swapp.fr" target="_blank" class="flex flex-1 items-center">
+		<a href="https://download.swapp.fr" target="_blank" rel="noopener noreferrer" class="flex flex-1 items-center">
 			<!-- Logo -->
 			<img
 				src="swapp.svg"
@@ -49,10 +49,12 @@
 	</div>
 
 	<div
-		class="fixed bottom-6 right-6 z-50 hidden w-[240px] flex-col items-center justify-center gap-3 rounded-lg bg-white px-4 py-5 dark:bg-black lg:flex"
-		style:background={color && argbToHex(color)}
+		class="fixed bottom-6 right-6 z-50 hidden w-[240px] flex-col items-center justify-center gap-3 rounded-lg px-4 py-5 lg:flex"
+		style:background={color ? `${argbToHex(color)}66` : 'rgba(255, 255, 255, 0.9)'}
+		style:backdrop-filter="blur(40px)"
+		style:-webkit-backdrop-filter="blur(40px)"
 	>
-		<a href="https://swapp.fr" target="_blank" rel="noopener noreferrer" class="flex flex-col justify-center items-center gap-3">
+		<a href="https://swapp.fr" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center justify-center gap-3">
 			<div
 				class="flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale"
 			>

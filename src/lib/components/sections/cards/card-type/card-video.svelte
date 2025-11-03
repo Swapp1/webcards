@@ -16,7 +16,7 @@
 	title={alt}
 	aria-label={alt}
 	controls
-	class="aspect-video w-full rounded-lg object-cover"
+	class="aspect-video w-full rounded-[24px] object-cover"
 	width="628"
 	height="360"
 >

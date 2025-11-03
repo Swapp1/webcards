@@ -15,7 +15,7 @@
 <img
 	{src}
 	{alt}
-	class="animate-touch aspect-video w-full rounded-lg object-cover"
+	class="animate-touch aspect-video w-full rounded-[24px] object-cover"
 	width="628"
 	height="360"
 	style:display={imgLoading ? 'none' : 'block'}

@@ -7,9 +7,6 @@
 
 	import { Drawer } from 'vaul-svelte';
 
-	import { DotLottieSvelte } from '@lottiefiles/dotlottie-svelte';
-
-	import Loader from '$lib/assets/loading.lottie';
 	import CardInfo from '$lib/components/sections/cards/card-info.svelte';
 	import FloatingBtn from '$lib/components/sections/nav/floating-btn.svelte';
 	import Footer from '$lib/components/sections/nav/footer.svelte';
@@ -25,76 +22,77 @@
 	const { card, params } = data;
 
 	const isCardPersonal = $state(card.type === 'personal');
-	const coloredBg = $state(
-		card.cardColor ? (card.cardColor === '#FFFFFFFF' ? false : card.cardColor) : false
-	);
+	
+	// Normalise et valide la couleur
+	const normalizeColor = (color: string | undefined | null): string | null => {
+		if (!color) return null;
+		if (color === '#FFFFFFFF' || color === '#FFFFFF') return null;
+		
+		// Si RGB (#RRGGBB), convertir en ARGB (#FFRRGGBB)
+		if (color.length === 7) {
+			return `#FF${color.substring(1)}`;
+		}
+		
+		return color;
+	};
+	
+	const coloredBg = $state(normalizeColor(card.cardColor));
 
 	let imgLoading = $state(true);
-
 	let cardScrollElement: HTMLDivElement | undefined = $state();
 	let isCardScrollable = $state(false);
-
 	let imgHeight = $state(0);
 	let imgEl: HTMLImageElement | undefined = $state();
-
 	let windowWidth = $state(0);
 	let topH = $state(0);
 
-	// 2. Effect to keep windowWidth in sync
+	// Sync window width
 	$effect(() => {
 		const updateWidth = () => {
 			windowWidth = window.innerWidth;
 		};
 
-		// set initial
 		updateWidth();
-
 		window.addEventListener('resize', updateWidth);
-		return () => {
-			window.removeEventListener('resize', updateWidth);
-		};
+		
+		return () => window.removeEventListener('resize', updateWidth);
 	});
 
+	// Apply background colors
 	$effect(() => {
-		document.body.style.background = coloredBg
-			? `${argbToHex(coloredBg)}`
-			: 'hsl(var(--background))';
-
-		document.body.style.setProperty(
-			'--action-drawer',
-			`${coloredBg ? `${argbToHex(coloredBg)}` : 'white'}`
-		);
+		const bgColor = coloredBg ? argbToHex(coloredBg) : 'hsl(var(--background))';
+		
+		document.body.style.background = bgColor;
+		document.body.style.setProperty('--action-drawer', bgColor);
 	});
 
+	// Check scroll & calculate heights
 	$effect(() => {
-		let browserFontSize = 16; // Default font size
+		let browserFontSize = 16;
+		
 		if (typeof window !== 'undefined') {
 			const computedStyle = window.getComputedStyle(document.documentElement);
 			browserFontSize = Number(computedStyle.fontSize.replace('px', ''));
 		}
 
 		topH = (windowWidth >= 768 ? imgHeight - 30 : imgHeight - 24) + 4 * browserFontSize;
+		
 		const checkScroll = async () => {
-			// Wait for the next tick to ensure DOM updates are applied
 			await tick();
+			
 			if (cardScrollElement) {
 				isCardScrollable =
 					Math.round(topH + cardScrollElement.scrollHeight) > Math.round(window.innerHeight);
 			}
 		};
 
-		// Initial check
 		checkScroll();
-
-		// Add resize listener
 		window.addEventListener('resize', checkScroll);
 
-		// Cleanup listener
-		return () => {
-			window.removeEventListener('resize', checkScroll);
-		};
+		return () => window.removeEventListener('resize', checkScroll);
 	});
 
+	// Update image height on resize
 	$effect(() => {
 		const updateHeight = () => {
 			if (imgEl) {
@@ -103,9 +101,8 @@
 		};
 
 		window.addEventListener('resize', updateHeight);
-		return () => {
-			window.removeEventListener('resize', updateHeight);
-		};
+		
+		return () => window.removeEventListener('resize', updateHeight);
 	});
 </script>
 
@@ -144,7 +141,7 @@
 {#if imgLoading}
 	<div class="fixed z-[60] h-screen w-full bg-background">
 		<div class="h-screen w-full bg-zinc-800">
-			<div class={cn('relative  flex w-full justify-center sm:h-screen sm:overflow-hidden')}>
+			<div class={cn('relative flex w-full justify-center sm:h-screen sm:overflow-hidden')}>
 				<div class="flex w-full flex-col items-center scroll-smooth sm:h-screen sm:overflow-auto">
 					<hr class="hidden h-16 w-full border-0 sm:flex" />
 					<main
@@ -154,14 +151,12 @@
 							<div class="flex h-full items-center justify-center space-x-2">
 								<span class="sr-only">Loading...</span>
 								<div
-									class="bg-gray-400 h-4 w-4 animate-bounce rounded-full [animation-delay:-0.3s]"
+									class="h-4 w-4 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.3s]"
 								></div>
 								<div
-									class="bg-gray-400 h-4 w-4 animate-bounce rounded-full [animation-delay:-0.15s]"
+									class="h-4 w-4 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]"
 								></div>
-								<div
-									class="bg-gray-400 h-4 w-4 animate-bounce rounded-full"
-								></div>
+								<div class="h-4 w-4 animate-bounce rounded-full bg-gray-400"></div>
 							</div>
 						</div>
 					</main>
@@ -181,13 +176,13 @@
 		class={cn('pointer-events-none absolute hidden h-screen w-full backdrop-blur-[200px] sm:flex')}
 	></div>
 
-	<Logo className="hidden sm:flex  absolute  top-6 right-6" iconClass="lg:w-12 lg:h-12" />
+	<Logo className="absolute right-6 top-6 hidden sm:flex" iconClass="lg:w-12 lg:h-12" />
 
 	<div class="flex w-full flex-col items-center scroll-smooth sm:h-screen sm:overflow-auto">
 		<hr class="hidden h-16 w-full border-0 sm:flex" />
 
 		<main class="relative flex h-auto w-full flex-col sm:max-w-[42.8125rem]">
-			<FloatingBtn color={coloredBg} pic={card.profilePicture} />
+			<FloatingBtn color={coloredBg ?? undefined} pic={card.profilePicture} />
 
 			<section class="relative">
 				<img
@@ -221,15 +216,15 @@
 							<Drawer.Content
 								class={cn(
 									'fixed bottom-0 z-20 flex h-1/5 w-full items-start justify-center rounded-t-[1.25rem] !bg-[var(--action-drawer)] pt-6 focus-visible:outline-none',
-									'transition-all duration-300 ease-out animate-in slide-in-from-bottom'
+									'animate-in slide-in-from-bottom transition-all duration-300 ease-out'
 								)}
 							>
 								<ActionBtn
 									pic={card.profilePicture}
 									text="Add to phone contacts"
 									className={cn(
-										' w-3/4 text-[0.9375rem] leading-[0.9375rem]',
-										coloredBg ? '!bg-white !text-black' : '!bg-black  !text-white'
+										'w-3/4 text-[0.9375rem] leading-[0.9375rem]',
+										coloredBg ? '!bg-white !text-black' : '!bg-black !text-white'
 									)}
 									swapps={card.swapps}
 									name={card.displayName}
@@ -241,7 +236,7 @@
 
 					{#if !isCardPersonal && card.professionalCardType === 'jobSeeker'}
 						<Badge
-							class="flex gap-[7px] rounded-lg bg-black/30 px-4 py-3 text-xs leading-3 backdrop-blur-[20px] dark:text-white  md:text-sm"
+							class="flex gap-[7px] rounded-lg bg-black/30 px-4 py-3 text-xs leading-3 backdrop-blur-[20px] dark:text-white md:text-sm"
 							>Looking for work <span class="h-2 w-2 rounded-full bg-white"></span></Badge
 						>
 					{/if}
@@ -252,7 +247,9 @@
 				{#if isCardPersonal && card.cardDesignType === 'centered'}
 					<div
 						class="absolute bottom-0 flex h-fit min-h-[150px] w-full flex-col items-center justify-center gap-2 px-6 pb-11 pt-[100vh] text-white md:px-9 md:pb-12"
-						style:background={`linear-gradient(180deg, ${hexToRgba(argbToHex(coloredBg), 0)} 75%, ${hexToRgba(argbToHex(coloredBg), 0.9)} 90%, ${hexToRgba(argbToHex(coloredBg), 1)} 95%);`}
+						style:background={coloredBg 
+							? `linear-gradient(180deg, ${hexToRgba(argbToHex(coloredBg), 0)} 75%, ${hexToRgba(argbToHex(coloredBg), 0.9)} 90%, ${hexToRgba(argbToHex(coloredBg), 1)} 95%)`
+							: ''}
 					>
 						<span
 							class="font-sf-pro-display text-[2.5rem] font-black italic leading-[100%] tracking-[1px]"
@@ -281,7 +278,7 @@
 			</section>
 
 			<div
-				class={cn('absolute flex w-full flex-col justify-between gap-2  rounded-t-[1.25rem]')}
+				class={cn('absolute flex w-full flex-col justify-between gap-2 rounded-t-[1.25rem]')}
 				style:top={windowWidth >= 768 ? `${imgHeight - 30}px` : `${imgHeight - 24}px`}
 				style:height={windowWidth >= 640
 					? isCardScrollable
@@ -303,8 +300,8 @@
 					)}
 					style:background={coloredBg ? `${argbToHex(coloredBg)}` : 'hsl(var(--background))'}
 				>
-					<Swapps swapps={card.swapps} isColor={coloredBg} />
-					<Footer isColor={coloredBg} />
+					<Swapps swapps={card.swapps} isColor={!!coloredBg} />
+					<Footer isColor={!!coloredBg} />
 				</div>
 
 				{#if isCardScrollable}
