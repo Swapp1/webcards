@@ -6,6 +6,7 @@
 	import { cn } from '$lib/utils';
 
 	import { Drawer } from 'vaul-svelte';
+	import { getTextColor } from '$lib/utils/color';
 
 	import CardInfo from '$lib/components/sections/cards/card-info.svelte';
 	import FloatingBtn from '$lib/components/sections/nav/floating-btn.svelte';
@@ -37,6 +38,7 @@
 	};
 	
 	const coloredBg = $state(normalizeColor(card.cardColor));
+	const textColor = $derived(coloredBg ? getTextColor(coloredBg) : null);
 
 	let imgLoading = $state(true);
 	let cardScrollElement: HTMLDivElement | undefined = $state();
@@ -224,7 +226,9 @@
 									text="Add to phone contacts"
 									className={cn(
 										'w-3/4 text-[0.9375rem] leading-[0.9375rem]',
-										coloredBg ? '!bg-white !text-black' : '!bg-black !text-white'
+										coloredBg && textColor === 'black' && '!bg-white !text-black',
+										coloredBg && textColor === 'white' && '!bg-black !text-white',
+										!coloredBg && '!bg-black !text-white'
 									)}
 									swapps={card.swapps}
 									name={card.displayName}
@@ -246,7 +250,12 @@
 
 				{#if isCardPersonal && card.cardDesignType === 'centered'}
 					<div
-						class="absolute bottom-0 flex h-fit min-h-[150px] w-full flex-col items-center justify-center gap-2 px-6 pb-11 pt-[100vh] text-white md:px-9 md:pb-12"
+						class={cn(
+							'absolute bottom-0 flex h-fit min-h-[150px] w-full flex-col items-center justify-center gap-2 px-6 pb-11 pt-[100vh] md:px-9 md:pb-12',
+							coloredBg && textColor === 'black' && 'text-black',
+							coloredBg && textColor === 'white' && 'text-white',
+							!coloredBg && 'text-white'
+						)}
 						style:background={coloredBg 
 							? `linear-gradient(180deg, ${hexToRgba(argbToHex(coloredBg), 0)} 75%, ${hexToRgba(argbToHex(coloredBg), 0.9)} 90%, ${hexToRgba(argbToHex(coloredBg), 1)} 95%)`
 							: ''}
@@ -300,8 +309,8 @@
 					)}
 					style:background={coloredBg ? `${argbToHex(coloredBg)}` : 'hsl(var(--background))'}
 				>
-					<Swapps swapps={card.swapps} isColor={!!coloredBg} />
-					<Footer isColor={!!coloredBg} />
+					<Swapps swapps={card.swapps} isColor={!!coloredBg} {textColor} />
+					<Footer isColor={!!coloredBg} {textColor} />
 				</div>
 
 				{#if isCardScrollable}

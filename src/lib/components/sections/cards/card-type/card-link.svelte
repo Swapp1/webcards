@@ -6,12 +6,14 @@
 		src,
 		detail,
 		link,
-		isColor
+		isColor,
+		textColor = null
 	}: {
 		src: string;
 		detail: string;
 		link: string;
 		isColor: boolean;
+		textColor?: 'black' | 'white' | null;
 	} = $props();
 
 	const validLink = $derived.by(() => {
@@ -40,7 +42,9 @@
 	rel={validLink ? 'noopener noreferrer' : undefined}
 	class={cn(
 		'animate-touch flex items-center gap-4 rounded-[24px] px-4 py-3 md:px-[1.375rem] md:py-[1.125rem]',
-		isColor ? 'bg-white/20' : 'bg-white dark:bg-[#1B1B1B]'
+		isColor && textColor === 'black' && 'bg-black/10',
+		isColor && textColor === 'white' && 'bg-white/20',
+		!isColor && 'bg-white dark:bg-[#1B1B1B]'
 	)}
 >
 	<img
@@ -62,7 +66,9 @@
 	<div
 		class={cn(
 			'flex min-w-0 flex-1 flex-col gap-1.5',
-			isColor ? 'text-white' : 'text-black dark:text-white'
+			isColor && textColor === 'black' && 'text-black',
+			isColor && textColor === 'white' && 'text-white',
+			!isColor && 'text-black dark:text-white'
 		)}
 	>
 		<h2 class="text-[1.06rem] leading-4 md:text-xl md:leading-5">
@@ -71,7 +77,9 @@
 		<h3
 			class={cn(
 				'truncate text-xs font-light leading-3 md:text-sm md:leading-3.5',
-				isColor ? 'text-white/70' : 'text-black/70 dark:text-white/70'
+				isColor && textColor === 'black' && 'text-black/70',
+				isColor && textColor === 'white' && 'text-white/70',
+				!isColor && 'text-black/70 dark:text-white/70'
 			)}
 		>
 			{haveAt}{displayDetail}

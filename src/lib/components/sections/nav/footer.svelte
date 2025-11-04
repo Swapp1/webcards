@@ -1,10 +1,16 @@
 <script lang="ts">
-  let { isColor }: { isColor: boolean } = $props();
+  let { 
+    isColor,
+    textColor = null
+  }: { 
+    isColor: boolean;
+    textColor?: 'black' | 'white' | null;
+  } = $props();
 </script>
 
 <footer
   class="flex flex-col items-center justify-center pt-10 pb-20"
-  style="color: {isColor ? 'white' : 'hsl(var(--text))'}"
+ style="color: {isColor && textColor === 'black' ? 'black' : isColor && textColor === 'white' ? 'white' : 'hsl(var(--text))'}"
 >
   <!-- Logo Swapp large & rounded -->
 <a href="https://download.swapp.fr" target="_blank" class="flex flex-col items-center">
