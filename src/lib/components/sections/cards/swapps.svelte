@@ -55,22 +55,31 @@
 			src={swapp.title}
 			detail={`${swapp.extras?.countryCode ?? ''}${swapp.detail}`}
 			link={swapp.link}
+			customIcon={swapp.extras?.customIcon}
+			customName={swapp.extras?.customName}
+			customTitle={swapp.extras?.customTitle}
 		/>
 	{:else if swapp.title === 'Link'}
-		<CardLink 
-			{isColor} 
-			{textColor} 
-			src={swapp.title} 
-			detail={swapp.extras?.linkName} 
-			link={swapp.detail} 
+		<CardLink
+			{isColor}
+			{textColor}
+			src={swapp.title}
+			detail={swapp.extras?.linkName}
+			link={swapp.detail}
+			customIcon={swapp.extras?.customIcon}
+			customName={swapp.extras?.customName}
+			customTitle={swapp.extras?.customTitle}
 		/>
 	{:else}
-		<CardLink 
-			{isColor} 
-			{textColor} 
-			src={swapp.title} 
-			detail={swapp.detail} 
-			link={swapp.link} 
+		<CardLink
+			{isColor}
+			{textColor}
+			src={swapp.title}
+			detail={swapp.detail}
+			link={swapp.link}
+			customIcon={swapp.extras?.customIcon}
+			customName={swapp.extras?.customName}
+			customTitle={swapp.extras?.customTitle}
 		/>
 	{/if}
 {/each}

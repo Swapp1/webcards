@@ -7,13 +7,19 @@
 		detail,
 		link,
 		isColor,
-		textColor = null
+		textColor = null,
+		customIcon,
+		customName,
+		customTitle
 	}: {
 		src: string;
 		detail: string;
 		link: string;
 		isColor: boolean;
 		textColor?: 'black' | 'white' | null;
+		customIcon?: string;
+		customName?: string;
+		customTitle?: string;
 	} = $props();
 
 	const validLink = $derived.by(() => {
@@ -30,7 +36,7 @@
 		src !== 'Whatsapp number' && src !== 'Link' && link ? '@' : ''
 	);
 
-	const displayTitle = $derived(src === 'Link' ? detail : src);
+	const displayTitle = $derived(customTitle || customName || (src === 'Link' ? detail : src));
 	const displayDetail = $derived(src === 'Link' ? link : detail);
 
 	const [light, dark] = getIcons(src);
@@ -47,21 +53,31 @@
 		!isColor && 'bg-white dark:bg-[#1B1B1B]'
 	)}
 >
-	<img
-		src={light}
-		class={cn('h-12 w-12 md:h-14 md:w-14', !isColor && 'dark:hidden')}
-		alt={src}
-		width="48"
-		height="48"
-	/>
-	{#if !isColor}
+	{#if customIcon}
 		<img
-			src={dark}
-			class="hidden h-12 w-12 dark:block md:h-14 md:w-14"
+			src={customIcon}
+			class="h-12 w-12 rounded-full object-cover md:h-14 md:w-14"
 			alt={src}
 			width="48"
 			height="48"
 		/>
+	{:else}
+		<img
+			src={light}
+			class={cn('h-12 w-12 md:h-14 md:w-14', !isColor && 'dark:hidden')}
+			alt={src}
+			width="48"
+			height="48"
+		/>
+		{#if !isColor}
+			<img
+				src={dark}
+				class="hidden h-12 w-12 dark:block md:h-14 md:w-14"
+				alt={src}
+				width="48"
+				height="48"
+			/>
+		{/if}
 	{/if}
 	<div
 		class={cn(

@@ -1,6 +1,11 @@
 export type SwappsTypes = {
     detail: string;
-    extras: { [key: string]: string }
+    extras: {
+        [key: string]: string | undefined;
+        customIcon?: string;
+        customName?: string;
+        customTitle?: string;
+    }
     groupId: string;
     help: string;
     hexColorCode: string;
