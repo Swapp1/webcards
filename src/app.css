@@ -1,5 +1,3 @@
-@import url('https://fonts.cdnfonts.com/css/sf-pro-display');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -36,6 +34,14 @@
 		--sidebar-ring: 217.2 91.2% 59.8%;
 
 		--primary-gray: 0 0% 27%;
+
+		/* Card style colors */
+		--card-bg-default: #F5F5F5;
+		--card-bg-dark: #121212;
+		--tile-bg-light: #FFFFFF;
+		--tile-bg-dark: #1E1E1E;
+		--tile-icon-bg-light: #F0F0F0;
+		--tile-icon-bg-dark: #2A2A2A;
 	}
 
 	.dark {
@@ -71,59 +77,189 @@
 	}
 }
 
-@font-face {
-	font-family: 'SofiaPro';
-	font-style: normal;
-	font-weight: 300;
-	font-display: swap;
-	src: url('/fonts/SofiaPro-Light.woff2') format('woff2'),
-		url('/fonts/SofiaPro-Light.woff') format('woff');
-}
-
-@font-face {
-	font-family: 'SofiaPro';
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: url('/fonts/SofiaPro-Regular.woff2') format('woff2'),
-		url('/fonts/SofiaPro-Regular.woff') format('woff');
-}
-
-@font-face {
-	font-family: 'SofiaPro';
-	font-style: normal;
-	font-weight: 500;
-	font-display: swap;
-	src: url('/fonts/SofiaPro-Medium.woff2') format('woff2'),
-		url('/fonts/SofiaPro-Medium.woff') format('woff');
-}
-
-@font-face {
-	font-family: 'SofiaPro';
-	font-style: normal;
-	font-weight: 600;
-	font-display: swap;
-	src: url('/fonts/SofiaPro-SemiBold.woff2') format('woff2'),
-		url('/fonts/SofiaPro-SemiBold.woff') format('woff');
-}
-
 @layer base {
 	* {
 		@apply border-border;
-		/* scrollbar-width: none; */
+	}
+
+	html {
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-rendering: optimizeLegibility;
 	}
 
 	body {
-		@apply font-sofia text-black dark:text-white;
+		@apply font-inter text-black dark:text-white;
 	}
 
+	/* Interactive touch animation */
 	.animate-touch {
-		@apply transition-transform duration-150 ease-in-out active:scale-[0.98]
+		@apply transition-transform duration-150 ease-out will-change-transform;
+	}
+
+	.animate-touch:active {
+		transform: scale(0.98);
 	}
 
 	@media (hover: hover) {
-		.animate-touch {
-			@apply hover:scale-[0.99];
+		.animate-touch:hover {
+			transform: scale(0.99);
 		}
+		.animate-touch:active {
+			transform: scale(0.97);
+		}
+	}
+
+	/* Slide up animation for tiles */
+	.animate-slide-up {
+		animation: slideUp 0.4s ease-out forwards;
+		opacity: 0;
+	}
+
+	/* Stagger delays for tile entrance */
+	.stagger-1 { animation-delay: 35ms; }
+	.stagger-2 { animation-delay: 70ms; }
+	.stagger-3 { animation-delay: 105ms; }
+	.stagger-4 { animation-delay: 140ms; }
+	.stagger-5 { animation-delay: 175ms; }
+	.stagger-6 { animation-delay: 210ms; }
+	.stagger-7 { animation-delay: 245ms; }
+	.stagger-8 { animation-delay: 280ms; }
+	.stagger-9 { animation-delay: 315ms; }
+	.stagger-10 { animation-delay: 350ms; }
+
+	/* Fade in animation */
+	.animate-fade-in {
+		animation: fadeIn 0.3s ease-out forwards;
+		opacity: 0;
+	}
+
+	/* Scale in animation */
+	.animate-scale-in {
+		animation: scaleIn 0.3s ease-out forwards;
+		opacity: 0;
+	}
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes scaleIn {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+	0% {
+		background-position: -200% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
+}
+
+.skeleton-shimmer {
+	background: linear-gradient(90deg,
+		rgba(255,255,255,0) 0%,
+		rgba(255,255,255,0.3) 50%,
+		rgba(255,255,255,0) 100%
+	);
+	background-size: 200% 100%;
+	animation: shimmer 1.5s infinite;
+}
+
+/* Optimized image loading */
+.img-loading {
+	background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+	background-size: 200% 200%;
+	animation: gradientShift 2s ease infinite;
+}
+
+@keyframes gradientShift {
+	0%, 100% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+}
+
+/* Owner info card styles */
+.owner-info-card {
+	@apply rounded-2xl px-5 py-4;
+}
+
+/* Circular profile photo */
+.profile-photo-circle {
+	@apply rounded-full object-cover;
+	width: 130px;
+	height: 130px;
+}
+
+/* Company logo on cover */
+.company-logo-cover {
+	@apply rounded-full object-cover border-[3px] border-white;
+	width: 40px;
+	height: 40px;
+}
+
+/* Gradient overlays */
+.gradient-overlay-dark {
+	background: linear-gradient(
+		180deg,
+		rgba(0, 0, 0, 0) 0%,
+		rgba(0, 0, 0, 0.6) 8%,
+		rgba(0, 0, 0, 0.8) 18%,
+		rgba(0, 0, 0, 0.4) 35%,
+		rgba(0, 0, 0, 0) 50%
+	);
+}
+
+/* Scroll snap for mobile */
+@media (max-width: 639px) {
+	.scroll-snap-container {
+		scroll-snap-type: y proximity;
+	}
+
+	.scroll-snap-item {
+		scroll-snap-align: start;
+	}
+}
+
+/* Performance optimizations */
+.gpu-accelerated {
+	transform: translateZ(0);
+	will-change: transform;
+	backface-visibility: hidden;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+	.animate-slide-up,
+	.animate-fade-in,
+	.animate-scale-in,
+	.animate-touch {
+		animation: none !important;
+		transition: none !important;
 	}
 }

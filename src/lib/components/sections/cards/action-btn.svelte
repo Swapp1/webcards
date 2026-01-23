@@ -23,9 +23,8 @@
 		org?: string;
 	} = $props();
 
-	async function optimizeImage(imageUrl: string, maxWidth = 400, maxHeight = 400) {
+	async function optimizeImage(imageUrl: string, maxWidth = 300, maxHeight = 300) {
 		try {
-			// Create image element
 			const img = new Image();
 			img.crossOrigin = 'anonymous';
 
@@ -35,7 +34,6 @@
 				img.src = imageUrl;
 			});
 
-			// Calculate new dimensions
 			let width = img.width;
 			let height = img.height;
 
@@ -51,7 +49,6 @@
 				}
 			}
 
-			// Create canvas and resize
 			const canvas = document.createElement('canvas');
 			canvas.width = width;
 			canvas.height = height;
@@ -59,8 +56,7 @@
 			const ctx = canvas.getContext('2d');
 			ctx?.drawImage(img, 0, 0, width, height);
 
-			// Convert to base64 with reduced quality
-			const base64Data = canvas.toDataURL('image/jpeg', 0.7);
+			const base64Data = canvas.toDataURL('image/jpeg', 0.6);
 			return base64Data.split(',')[1];
 		} catch (error) {
 			console.error('Error optimizing image:', error);
@@ -70,40 +66,44 @@
 
 	async function downloadVCF() {
 		loading = true;
-		let vcfData = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTITLE:${title + (org ? ` at ${org}` : '')}\n`;
 
-		const base64Image = await optimizeImage(pic);
-		if (base64Image) {
-			vcfData += `PHOTO;ENCODING=BASE64;TYPE=JPEG:${base64Image}\n`;
-		}
+		try {
+			let vcfData = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTITLE:${title + (org ? ` at ${org}` : '')}\n`;
 
-		if (swapps && swapps.length > 0) {
-			swapps.forEach((swapp) => {
-				if (!['Empty', 'Image', 'Header', 'Title', 'Video', 'Text', 'File'].includes(swapp.title)) {
-					if (swapp.title === 'Phone number') {
-						vcfData += `TEL;TYPE=CELL:${swapp.extras.countryCode}${swapp.detail}\n`;
-					} else if (swapp.title === 'Email') {
-						vcfData += `EMAIL:${swapp.detail}\n`;
-					} else if (swapp.title === 'Address') {
-						vcfData += `ADR:${swapp.detail}\n`;
-					} else {
-						vcfData += `URL;TYPE=${swapp.title}:${swapp.link}${swapp.detail}\n`;
+			const base64Image = await optimizeImage(pic);
+			if (base64Image) {
+				vcfData += `PHOTO;ENCODING=BASE64;TYPE=JPEG:${base64Image}\n`;
+			}
+
+			if (swapps && swapps.length > 0) {
+				for (const swapp of swapps) {
+					if (!['Empty', 'Image', 'Header', 'Title', 'Video', 'Text', 'File'].includes(swapp.title)) {
+						if (swapp.title === 'Phone number') {
+							vcfData += `TEL;TYPE=CELL:${swapp.extras?.countryCode ?? ''}${swapp.detail}\n`;
+						} else if (swapp.title === 'Email') {
+							vcfData += `EMAIL:${swapp.detail}\n`;
+						} else if (swapp.title === 'Address') {
+							vcfData += `ADR:${swapp.detail}\n`;
+						} else if (swapp.link) {
+							vcfData += `URL;TYPE=${swapp.title}:${swapp.link}${swapp.detail}\n`;
+						}
 					}
 				}
-			});
+			}
+
+			vcfData += 'END:VCARD';
+
+			const blob = new Blob([vcfData], { type: 'text/vcard' });
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `${name.replace(/\s+/g, '_')}.vcf`;
+			a.click();
+			window.URL.revokeObjectURL(url);
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		} finally {
+			loading = false;
 		}
-
-		vcfData += 'END:VCARD';
-
-		const blob = new Blob([vcfData], { type: 'text/vcard' });
-		const url = window.URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = 'contact.vcf';
-		a.click();
-		window.URL.revokeObjectURL(url);
-		loading = false;
-		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 </script>
 
@@ -111,18 +111,18 @@
 	type="button"
 	onclick={downloadVCF}
 	class={cn(
-		` rounded-[24px] bg-white/60 py-6 text-base font-medium text-black backdrop-blur-lg hover:bg-white dark:bg-black/20 dark:text-white hover:dark:bg-white/10 lg:bg-[#F3F3F3] lg:backdrop-blur-0`,
+		'rounded-[24px] bg-white/60 py-6 font-inter text-base font-medium text-black backdrop-blur-lg transition-all hover:bg-white dark:bg-black/20 dark:text-white hover:dark:bg-white/10 lg:bg-[#F3F3F3] lg:backdrop-blur-0',
 		className
 	)}
 >
 	{#if loading}
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
-			class="animate-spin"
-			width="24"
-			height="24"
+			class="mr-2 h-5 w-5 animate-spin"
 			viewBox="0 0 24 24"
 			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
 		>
 			<path d="M21 12a9 9 0 1 1-6.219-8.56" />
 		</svg>
