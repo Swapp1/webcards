@@ -571,12 +571,12 @@
 						src={card.profilePicture}
 						alt={card.displayName}
 						class={cn(
-							'hidden sm:block w-full object-cover sm:rounded-t-[1.25rem]',
+							'w-full object-cover sm:rounded-t-[1.25rem]',
+							imgLoading ? 'hidden' : 'hidden sm:block'
 						)}
 						style:height={getCoverHeight()}
 						fetchpriority="high"
 						loading="eager"
-						style:display={imgLoading ? 'none' : undefined}
 						onload={async () => {
 							imgLoading = false;
 							await tick();
@@ -591,12 +591,12 @@
 						src={card.profilePicture}
 						alt={card.displayName}
 						class={cn(
-							'sm:hidden w-full object-cover',
+							'w-full object-cover',
+							imgLoading ? 'hidden' : 'sm:hidden block'
 						)}
 						style:height={getCoverHeightMobile()}
 						fetchpriority="high"
 						loading="eager"
-						style:display={imgLoading ? 'none' : 'block'}
 						onload={async () => {
 							imgLoading = false;
 						}}
