@@ -96,15 +96,15 @@
 			!isColor && 'text-black dark:text-white'
 		)}
 	>
-		<h2 class="text-[1.06rem] font-medium leading-4 md:text-lg md:leading-5">
+		<h2 class="text-[1.06rem] font-semibold leading-4 md:text-lg md:leading-5">
 			{displayTitle}
 		</h2>
 		<h3
 			class={cn(
 				'truncate text-xs font-normal leading-3 md:text-sm md:leading-3.5',
-				isColor && textColor === 'black' && 'text-black/70',
-				isColor && textColor === 'white' && 'text-white/70',
-				!isColor && 'text-black/70 dark:text-white/70'
+				isColor && textColor === 'black' && 'text-black/50',
+				isColor && textColor === 'white' && 'text-white/50',
+				!isColor && 'text-black/50 dark:text-white/50'
 			)}
 		>
 			{haveAt}{displayDetail}

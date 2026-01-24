@@ -16,23 +16,25 @@
 	let imgLoading = $state(true);
 </script>
 
-<img
-	{src}
-	{alt}
-	class="animate-touch aspect-video w-full object-cover"
-	style="border-radius: {styleConfig.tileBorderRadius}px;"
-	width="628"
-	height="360"
-	loading="lazy"
-	decoding="async"
-	style:display={imgLoading ? 'none' : 'block'}
-	onload={() => {
-		imgLoading = false;
-	}}
-/>
-{#if imgLoading}
-	<Skeleton
-		class="aspect-video w-full bg-black/30 dark:bg-white/30"
+<div class="relative aspect-video w-full">
+	{#if imgLoading}
+		<Skeleton
+			class="absolute inset-0 bg-black/30 dark:bg-white/30"
+			style="border-radius: {styleConfig.tileBorderRadius}px;"
+		/>
+	{/if}
+	<img
+		{src}
+		{alt}
+		class="animate-touch aspect-video w-full object-cover"
+		class:opacity-0={imgLoading}
 		style="border-radius: {styleConfig.tileBorderRadius}px;"
+		width="628"
+		height="360"
+		loading="lazy"
+		decoding="async"
+		onload={() => {
+			imgLoading = false;
+		}}
 	/>
-{/if}
+</div>

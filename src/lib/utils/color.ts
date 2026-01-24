@@ -20,5 +20,6 @@ function getLuminance(hex: string): number {
  * @returns 'black' ou 'white'
  */
 export function getTextColor(bgColor: string): 'black' | 'white' {
-	return getLuminance(bgColor) > 128 ? 'black' : 'white';
+	// Seuil abaissé à 140 pour favoriser le texte blanc sur les gris moyens-foncés
+	return getLuminance(bgColor) > 140 ? 'black' : 'white';
 }

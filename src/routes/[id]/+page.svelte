@@ -17,7 +17,7 @@
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import { argbToHex, hexToRgba } from '$lib/hooks/icons';
 	import { tick } from 'svelte';
-	import { parseCardStyleType, getStyleConfig } from '$lib/config/card-styles';
+	import { parseCardStyleType, getStyleConfig, type CardStyleType } from '$lib/config/card-styles';
 
 	let { data }: { data: PageData } = $props();
 
@@ -25,9 +25,35 @@
 
 	const isCardPersonal = $state(card.type === 'personal');
 
-	// Parse card style type (with backward compatibility)
-	const cardStyleType = $derived(parseCardStyleType(card.cardStyleType));
+	// Style switcher for testing
+	const allStyles: CardStyleType[] = ['original', 'cover', 'classic', 'pro', 'minimal'];
+	let currentStyleIndex = $state(0);
+	let isStyleSwitcherOpen = $state(false);
+
+	// Parse card style type (with backward compatibility) - now overridable
+	const baseStyleType = $derived(parseCardStyleType(card.cardStyleType));
+
+	// Use overridden style if set, otherwise use base
+	$effect(() => {
+		currentStyleIndex = allStyles.indexOf(baseStyleType);
+	});
+
+	const cardStyleType = $derived(allStyles[currentStyleIndex]);
 	const styleConfig = $derived(getStyleConfig(cardStyleType));
+
+	// Style switcher functions
+	function nextStyle() {
+		currentStyleIndex = (currentStyleIndex + 1) % allStyles.length;
+	}
+
+	function prevStyle() {
+		currentStyleIndex = (currentStyleIndex - 1 + allStyles.length) % allStyles.length;
+	}
+
+	function selectStyle(index: number) {
+		currentStyleIndex = index;
+		isStyleSwitcherOpen = false;
+	}
 
 	// Normalise et valide la couleur
 	const normalizeColor = (color: string | undefined | null): string | null => {
@@ -45,11 +71,35 @@
 	const coloredBg = $state(normalizeColor(card.cardColor));
 	const textColor = $derived(coloredBg ? getTextColor(coloredBg) : null);
 
-	// Get background color for non-cover styles
+	// Get background color for the card content
 	const getBackgroundColor = () => {
 		if (coloredBg) return argbToHex(coloredBg);
 		if (cardStyleType === 'minimal') return '#F5F5F5';
 		return 'hsl(var(--background))';
+	};
+
+	// Get contrasted background for desktop (darker if light, lighter if dark)
+	const getDesktopBgColor = () => {
+		if (!coloredBg) {
+			// Default: slightly darker gray for minimal
+			return cardStyleType === 'minimal' ? '#E0E0E0' : '#D0D0D0';
+		}
+
+		const hex = argbToHex(coloredBg);
+		// Parse hex to RGB
+		const r = parseInt(hex.slice(1, 3), 16);
+		const g = parseInt(hex.slice(3, 5), 16);
+		const b = parseInt(hex.slice(5, 7), 16);
+
+		// If light color (textColor is black), make it darker
+		// If dark color (textColor is white), make it lighter
+		const factor = textColor === 'black' ? 0.85 : 1.2;
+
+		const newR = Math.min(255, Math.max(0, Math.round(r * factor)));
+		const newG = Math.min(255, Math.max(0, Math.round(g * factor)));
+		const newB = Math.min(255, Math.max(0, Math.round(b * factor)));
+
+		return `rgb(${newR}, ${newG}, ${newB})`;
 	};
 
 	let imgLoading = $state(true);
@@ -132,21 +182,13 @@
 				rgba(0, 0, 0, 0.4) 35%,
 				rgba(0, 0, 0, 0) 50%)`;
 		} else if (styleConfig.gradientType === 'background') {
-			// Background color gradient for Cover style
-			const bgHex = coloredBg ? argbToHex(coloredBg) : 'hsl(var(--background))';
-			const isPersonal = card.type === 'personal';
+			// Background color gradient for Cover style - smooth transition
+			const bgHex = coloredBg ? argbToHex(coloredBg) : '#ffffff';
 
-			if (isPersonal) {
-				return `linear-gradient(180deg,
-					${hexToRgba(bgHex, 0)} 75%,
-					${hexToRgba(bgHex, 0.9)} 90%,
-					${hexToRgba(bgHex, 1)} 95%)`;
-			} else {
-				return `linear-gradient(180deg,
-					${hexToRgba(bgHex, 0)} 70%,
-					${hexToRgba(bgHex, 0.9)} 88%,
-					${hexToRgba(bgHex, 1)} 95%)`;
-			}
+			return `linear-gradient(to bottom,
+				transparent 0%,
+				${hexToRgba(bgHex, 0.8)} 50%,
+				${bgHex} 80%)`;
 		}
 
 		return '';
@@ -172,10 +214,22 @@
 	// Determine if we should show owner info card
 	const showOwnerInfoCard = $derived(styleConfig.hasOwnerInfoCard);
 
-	// Calculate cover height based on style
+	// Calculate cover height based on style (desktop)
 	const getCoverHeight = () => {
 		if (showCircularProfile) {
 			return cardStyleType === 'minimal' ? '0' : `${styleConfig.coverHeightVh}vh`;
+		}
+		return `${styleConfig.coverHeightVh}vh`;
+	};
+
+	// Calculate cover height for mobile (slightly smaller for original)
+	const getCoverHeightMobile = () => {
+		if (showCircularProfile) {
+			return cardStyleType === 'minimal' ? '0' : `${styleConfig.coverHeightVh}vh`;
+		}
+		// Reduce height on mobile for original style
+		if (cardStyleType === 'original') {
+			return `${styleConfig.coverHeightVh - 10}vh`;
 		}
 		return `${styleConfig.coverHeightVh}vh`;
 	};
@@ -248,8 +302,46 @@
 	'relative flex w-full justify-center sm:h-screen sm:overflow-hidden',
 	`card-style-${cardStyleType}`
 )}>
-	<!-- Desktop background blur (only for styles with cover image) -->
-	{#if !showCircularProfile}
+	<!-- Style Switcher Button (top right) -->
+	<div class="fixed top-4 right-4 z-[100] flex flex-col items-end gap-2">
+		<button
+			onclick={() => isStyleSwitcherOpen = !isStyleSwitcherOpen}
+			class="flex items-center gap-2 rounded-full bg-black/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-all hover:bg-black/90"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+			</svg>
+			{cardStyleType}
+		</button>
+
+		{#if isStyleSwitcherOpen}
+			<div class="flex flex-col gap-1 rounded-xl bg-black/80 p-2 shadow-lg backdrop-blur-sm">
+				{#each allStyles as style, i}
+					<button
+						onclick={() => selectStyle(i)}
+						class={cn(
+							'rounded-lg px-4 py-2 text-left text-sm font-medium transition-all',
+							cardStyleType === style
+								? 'bg-white text-black'
+								: 'text-white hover:bg-white/20'
+						)}
+					>
+						{style}
+					</button>
+				{/each}
+			</div>
+		{/if}
+	</div>
+
+	<!-- Desktop background -->
+	{#if showCircularProfile}
+		<!-- Solid color background for pro/minimal styles (contrasted) -->
+		<div
+			class="pointer-events-none absolute hidden h-screen w-full sm:flex"
+			style:background={getDesktopBgColor()}
+		></div>
+	{:else}
+		<!-- Blurred image background for original/cover/classic styles -->
 		<img
 			src={card.profilePicture}
 			alt={card.displayName}
@@ -260,18 +352,20 @@
 		></div>
 	{/if}
 
-	<Logo className="absolute right-6 top-6 hidden sm:flex" iconClass="lg:w-12 lg:h-12" />
+	<Logo className="absolute right-6 top-6 hidden sm:flex" iconClass="w-8 h-8" />
 
-	<div class="flex w-full flex-col items-center scroll-smooth sm:h-screen sm:overflow-auto">
-		<hr class="hidden h-16 w-full border-0 sm:flex" />
+	<div class="flex w-full flex-col items-center scroll-smooth sm:h-screen sm:overflow-auto sm:pt-10">
 
-		<main class="relative flex h-auto w-full flex-col sm:max-w-[42.8125rem]">
-			<FloatingBtn color={coloredBg ?? undefined} pic={card.profilePicture} />
+		<main class={cn(
+			"relative flex h-auto w-full flex-col sm:max-w-[48rem] sm:rounded-xl sm:mb-10",
+			"sm:shadow-[0_0_60px_-15px_rgba(0,0,0,0.3)]"
+		)}>
+			<FloatingBtn color={coloredBg ?? undefined} pic={card.profilePicture} {textColor} />
 
 			<!-- PRO & MINIMAL STYLES: Circular Profile Photo Layout -->
 			{#if showCircularProfile}
 				<section
-					class="relative flex flex-col items-center pt-12 pb-6 sm:rounded-t-[1.25rem]"
+					class="relative flex flex-col items-center pt-12 pb-6 sm:rounded-t-xl"
 					style:background={coloredBg ? argbToHex(coloredBg) : (cardStyleType === 'minimal' ? '#F5F5F5' : 'hsl(var(--background))')}
 				>
 					<!-- Mobile header -->
@@ -310,11 +404,12 @@
 
 					<!-- Circular Profile Photo -->
 					<div class="relative mt-8">
+						<!-- Desktop photo -->
 						<img
 							bind:this={imgEl}
 							src={card.profilePicture}
 							alt={card.displayName}
-							class="profile-photo-circle shadow-lg"
+							class="profile-photo-circle shadow-lg hidden sm:block"
 							style="width: {styleConfig.circularProfilePhotoSize}px; height: {styleConfig.circularProfilePhotoSize}px;"
 							fetchpriority="high"
 							loading="eager"
@@ -324,6 +419,18 @@
 								if (imgEl) {
 									imgHeight = imgEl.getBoundingClientRect().height;
 								}
+							}}
+						/>
+						<!-- Mobile photo (smaller for minimal) -->
+						<img
+							src={card.profilePicture}
+							alt={card.displayName}
+							class="profile-photo-circle shadow-lg sm:hidden"
+							style="width: {cardStyleType === 'minimal' ? Math.round(styleConfig.circularProfilePhotoSize * 0.82) : styleConfig.circularProfilePhotoSize}px; height: {cardStyleType === 'minimal' ? Math.round(styleConfig.circularProfilePhotoSize * 0.82) : styleConfig.circularProfilePhotoSize}px;"
+							fetchpriority="high"
+							loading="eager"
+							onload={async () => {
+								imgLoading = false;
 							}}
 						/>
 
@@ -351,7 +458,7 @@
 						{/if}
 					</div>
 
-					<!-- Owner Info Card -->
+					<!-- Owner Info Card (Pro style) -->
 					{#if showOwnerInfoCard}
 						<div
 							class={cn(
@@ -400,23 +507,76 @@
 								</div>
 							{/if}
 						</div>
+					{:else if cardStyleType === 'minimal'}
+						<!-- Minimal style: text directly without card background -->
+						<div
+							class="mt-6 mb-2 w-full px-6 text-center"
+							style:color={coloredBg ? (textColor === 'black' ? 'black' : 'white') : 'black'}
+						>
+							<!-- Desktop name -->
+							<h1
+								class="font-inter hidden sm:block"
+								style="font-size: {styleConfig.nameFontSize}px; font-weight: {styleConfig.nameFontWeight}; letter-spacing: {styleConfig.nameLetterSpacing}px;"
+							>
+								{card.displayName}
+							</h1>
+							<!-- Mobile name (-1px) -->
+							<h1
+								class="font-inter sm:hidden"
+								style="font-size: {styleConfig.nameFontSize - 1}px; font-weight: {styleConfig.nameFontWeight}; letter-spacing: {styleConfig.nameLetterSpacing}px;"
+							>
+								{card.displayName}
+							</h1>
+							<!-- Desktop heading -->
+							<p
+								class="mt-2 opacity-70 hidden sm:block"
+								style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
+							>
+								{getHeadingText()}
+							</p>
+							<!-- Mobile heading (-1px) -->
+							<p
+								class="mt-2 opacity-70 sm:hidden"
+								style="font-size: {styleConfig.descFontSize - 1}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
+							>
+								{getHeadingText()}
+							</p>
+
+							{#if card.bio}
+								<!-- Desktop bio (70%) -->
+								<p
+									class="mx-auto mt-6 max-w-[70%] opacity-60 hidden sm:block"
+									style="font-size: {styleConfig.bioFontSize}px; font-weight: {styleConfig.bioFontWeight};"
+								>
+									{card.bio}
+								</p>
+								<!-- Mobile bio (85%, -1px) -->
+								<p
+									class="mx-auto mt-6 max-w-[85%] opacity-60 sm:hidden"
+									style="font-size: {styleConfig.bioFontSize - 1}px; font-weight: {styleConfig.bioFontWeight};"
+								>
+									{card.bio}
+								</p>
+							{/if}
+						</div>
 					{/if}
 				</section>
 
 			<!-- ORIGINAL, COVER, CLASSIC STYLES: Full Cover Image Layout -->
 			{:else}
 				<section class="relative">
+					<!-- Desktop image -->
 					<img
 						bind:this={imgEl}
 						src={card.profilePicture}
 						alt={card.displayName}
 						class={cn(
-							'w-full object-cover sm:rounded-t-[1.25rem]',
+							'hidden sm:block w-full object-cover sm:rounded-t-[1.25rem]',
 						)}
 						style:height={getCoverHeight()}
 						fetchpriority="high"
 						loading="eager"
-						style:display={imgLoading ? 'none' : 'block'}
+						style:display={imgLoading ? 'none' : undefined}
 						onload={async () => {
 							imgLoading = false;
 							await tick();
@@ -424,6 +584,21 @@
 							if (imgEl) {
 								imgHeight = imgEl.getBoundingClientRect().height;
 							}
+						}}
+					/>
+					<!-- Mobile image (smaller height for original) -->
+					<img
+						src={card.profilePicture}
+						alt={card.displayName}
+						class={cn(
+							'sm:hidden w-full object-cover',
+						)}
+						style:height={getCoverHeightMobile()}
+						fetchpriority="high"
+						loading="eager"
+						style:display={imgLoading ? 'none' : 'block'}
+						onload={async () => {
+							imgLoading = false;
 						}}
 					/>
 
@@ -471,25 +646,33 @@
 					{#if cardStyleType === 'cover' || (isCardPersonal && card.cardDesignType === 'centered')}
 						<div
 							class={cn(
-								'absolute bottom-0 flex h-fit min-h-[150px] w-full flex-col items-center justify-center gap-2 px-6 pb-11 pt-[100vh] md:px-9 md:pb-12',
+								'absolute bottom-0 flex h-[40%] w-full flex-col items-center justify-end px-6 pb-6 md:px-9 md:pb-8',
 								coloredBg && textColor === 'black' && 'text-black',
 								coloredBg && textColor === 'white' && 'text-white',
-								!coloredBg && 'text-white'
+								!coloredBg && 'text-black dark:text-white'
 							)}
 							style:background={getGradientStyle()}
 						>
 							<h1
 								class="font-inter text-center"
-								style="font-size: {styleConfig.nameFontSize}px; font-weight: {styleConfig.nameFontWeight}; letter-spacing: {styleConfig.nameLetterSpacing}px; line-height: 1.1;"
+								style="font-size: {styleConfig.nameFontSize}px; font-weight: {styleConfig.nameFontWeight}; letter-spacing: {styleConfig.nameLetterSpacing}px; line-height: 1.1; text-shadow: 0 1px 3px rgba(0,0,0,0.1);"
 							>
 								{card.displayName}
 							</h1>
 							<p
-								class="text-center"
+								class="mt-2 text-center"
 								style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; opacity: {styleConfig.descOpacity};"
 							>
 								{getHeadingText()}
 							</p>
+							{#if card.bio}
+								<p
+									class="mt-4 max-w-md text-center opacity-70"
+									style="font-size: {styleConfig.bioFontSize}px; font-weight: {styleConfig.bioFontWeight}; line-height: 1.5;"
+								>
+									{card.bio}
+								</p>
+							{/if}
 						</div>
 
 					<!-- CLASSIC STYLE: No overlay, info card will be below -->
@@ -516,28 +699,25 @@
 			<!-- Content Area -->
 			<div
 				class={cn(
-					'flex w-full flex-col justify-between rounded-t-[1.25rem]',
-					showCircularProfile ? '' : 'absolute'
+					'relative flex w-full flex-col justify-between',
+					cardStyleType === 'original' && '-mt-10 md:-mt-12'
 				)}
-				style:top={!showCircularProfile ? (windowWidth >= 768 ? `${imgHeight - 30}px` : `${imgHeight - 24}px`) : undefined}
-				style:min-height={!showCircularProfile && windowWidth >= 640 && isCardScrollable ? `calc(100vh - ${topH}px)` : ''}
 			>
 				<!-- Classic Style: Owner Info Card -->
 				{#if cardStyleType === 'classic' && !showCircularProfile}
 					<div
-						class="owner-info-card mx-4 -mt-6 mb-4 shadow-sm dark:bg-black dark:text-white"
-						style:background="white"
+						class="w-full px-5 py-6 sm:px-16 sm:py-10 bg-white dark:bg-[#1a1a1a]"
 					>
-						<div class="flex items-center justify-between">
-							<div>
+						<div class="flex items-start justify-between gap-4">
+							<div class="flex-1">
 								<h1
 									class="font-inter text-black dark:text-white"
-									style="font-size: {styleConfig.nameFontSize}px; font-weight: {styleConfig.nameFontWeight}; letter-spacing: {styleConfig.nameLetterSpacing}px;"
+									style="font-size: {styleConfig.nameFontSize}px; font-weight: {styleConfig.nameFontWeight}; letter-spacing: {styleConfig.nameLetterSpacing}px; line-height: 1.2;"
 								>
 									{card.displayName}
 								</h1>
 								<p
-									class="mt-1 text-black dark:text-white"
+									class="mt-2 text-black/70 dark:text-white/70"
 									style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
 								>
 									{getHeadingText()}
@@ -546,7 +726,7 @@
 
 							{#if !isCardPersonal && card.companyLogo}
 								{#if card.companyLink}
-									<a href={`//${card.companyLink}`} target="_blank">
+									<a href={`//${card.companyLink}`} target="_blank" class="flex-shrink-0 self-start">
 										<img
 											src={card.companyLogo}
 											alt={card.company}
@@ -558,7 +738,7 @@
 									<img
 										src={card.companyLogo}
 										alt={card.company}
-										class="rounded-full object-cover"
+										class="flex-shrink-0 self-start rounded-full object-cover"
 										style="width: {styleConfig.companyLogoSize}px; height: {styleConfig.companyLogoSize}px;"
 									/>
 								{/if}
@@ -567,15 +747,15 @@
 
 						{#if card.bio}
 							<p
-								class="mt-3 text-black/70 dark:text-white/70"
-								style="font-size: {styleConfig.bioFontSize}px; font-weight: {styleConfig.bioFontWeight};"
+								class="mt-5 max-w-[70%] text-black/60 dark:text-white/60"
+								style="font-size: {styleConfig.bioFontSize}px; font-weight: {styleConfig.bioFontWeight}; line-height: 1.5;"
 							>
 								{card.bio}
 							</p>
 						{/if}
 
 						{#if !isCardPersonal && card.keySkills && card.keySkills.length > 0}
-							<div class="mt-3 flex flex-wrap gap-2">
+							<div class="mt-5 flex flex-wrap gap-2">
 								{#each card.keySkills as skill}
 									<Badge class="rounded-[1.25rem] bg-gray-100 px-3 py-1.5 text-xs text-gray-800 dark:bg-white/10 dark:text-white">
 										{skill}
@@ -589,11 +769,9 @@
 				<div
 					bind:this={cardScrollElement}
 					class={cn(
-						'flex h-full w-full flex-col justify-between px-5 py-6 sm:min-h-full md:px-9 md:pb-5 md:pt-[1.875rem]',
-						isCardScrollable ? 'sm:rounded-b-[1.25rem]' : 'sm:rounded-b-0',
-						!showCircularProfile && cardStyleType !== 'classic' && !styleConfig.hasGradientOverlay
-							? 'rounded-t-[1.25rem] md:rounded-t-[1.875rem]'
-							: showCircularProfile ? '' : 'rounded-t-none'
+						'flex h-full w-full flex-col justify-between px-5 py-6 sm:px-16 sm:py-10',
+						cardStyleType === 'original' && 'rounded-t-[1.25rem] md:rounded-t-[1.875rem]',
+						(cardStyleType === 'original' || cardStyleType === 'cover') && 'sm:rounded-b-xl'
 					)}
 					style:background={getBackgroundColor()}
 					style:gap="{styleConfig.tileSpacing}px"
@@ -607,10 +785,12 @@
 					<Footer isColor={!!coloredBg} {textColor} />
 				</div>
 
-				{#if isCardScrollable}
-					<hr class="hidden h-16 w-full border-0 sm:flex" />
-				{/if}
 			</div>
 		</main>
+
+		<!-- Spacer for scrollable content (outside main to avoid shadow issues) -->
+		{#if isCardScrollable}
+			<hr class="hidden h-16 w-full border-0 sm:flex" />
+		{/if}
 	</div>
 </div>

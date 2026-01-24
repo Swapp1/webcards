@@ -6,6 +6,7 @@
 	let visible = true;
 	export let color: string | undefined;
 	export let pic: string;
+	export let textColor: 'black' | 'white' | null = null;
 </script>
 
 {#if visible}
@@ -48,46 +49,31 @@
 		</button>
 	</div>
 
-	<div
-		class="fixed bottom-6 right-6 z-50 hidden w-[240px] flex-col items-center justify-center gap-3 rounded-lg px-4 py-5 lg:flex"
-		style:background={color ? `${argbToHex(color)}66` : 'rgba(255, 255, 255, 0.9)'}
-		style:backdrop-filter="blur(40px)"
-		style:-webkit-backdrop-filter="blur(40px)"
+	<a
+		href="https://swapp.fr"
+		target="_blank"
+		rel="noopener noreferrer"
+		class="fixed bottom-4 right-4 z-50 hidden w-[200px] flex-col items-center justify-center gap-3 rounded-xl px-4 py-4 lg:flex"
+		style:background={color ? argbToHex(color) : 'rgba(30, 30, 30, 0.95)'}
+		style:color={color ? (textColor === 'black' ? 'black' : 'white') : 'white'}
 	>
-		<a href="https://swapp.fr" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center justify-center gap-3">
-			<div
-				class="flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale"
-			>
-				<Avatar.Root>
-					<Avatar.Image src={pic} alt="@User" />
-					<Avatar.Fallback>
-						<Skeleton class="h-full w-full" />
-					</Avatar.Fallback>
-				</Avatar.Root>
-				<Avatar.Root>
-					<Avatar.Image src="swapp.svg" alt="@swapp" />
-					<Avatar.Fallback>
-						<Skeleton class="h-full w-full" />
-					</Avatar.Fallback>
-				</Avatar.Root>
-			</div>
+		<div
+			class="flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale"
+		>
+			<Avatar.Root>
+				<Avatar.Image src={pic} alt="@User" />
+				<Avatar.Fallback>
+					<Skeleton class="h-full w-full" />
+				</Avatar.Fallback>
+			</Avatar.Root>
+			<Avatar.Root>
+				<Avatar.Image src="swapp.svg" alt="@swapp" />
+				<Avatar.Fallback>
+					<Skeleton class="h-full w-full" />
+				</Avatar.Fallback>
+			</Avatar.Root>
+		</div>
 
-			<span class="text-sm font-semibold leading-none">Create your free card now</span>
-		</a>
-
-		<button class="absolute right-2 top-2" aria-label="Close" on:click={() => (visible = false)}>
-			<svg
-				width="19"
-				height="19"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-			>
-				<line x1="18" y1="6" x2="6" y2="18"></line>
-				<line x1="6" y1="6" x2="18" y2="18"></line>
-			</svg>
-		</button>
-	</div>
+		<span class="whitespace-nowrap text-sm font-semibold leading-none">Create your free card now</span>
+	</a>
 {/if}
