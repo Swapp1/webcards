@@ -2,6 +2,7 @@
 	import { Drawer } from 'vaul-svelte';
 	import { cn } from '$lib/utils';
 	import { submitLead, type LeadData } from '$lib/firebase/cards';
+	import { trackLeadCapture } from '$lib/firebase/analytics';
 	import { browser } from '$app/environment';
 
 	let {
@@ -10,6 +11,7 @@
 		ownerPhoto,
 		ownerId,
 		cardId,
+		cardType = '',
 		onSubmitSuccess
 	}: {
 		open: boolean;
@@ -17,6 +19,7 @@
 		ownerPhoto: string;
 		ownerId: string;
 		cardId: string;
+		cardType?: string;
 		onSubmitSuccess?: () => void;
 	} = $props();
 
@@ -61,6 +64,9 @@
 			};
 
 			await submitLead(ownerId, cardId, leadData);
+
+			// Track lead capture in stats
+			await trackLeadCapture(cardId, ownerId, cardType, ownerName);
 
 			// Cache submission in localStorage
 			if (browser) {

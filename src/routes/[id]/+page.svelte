@@ -819,6 +819,7 @@
 		ownerPhoto={card.profilePicture}
 		ownerId={card.ownerId}
 		cardId={card.personalizedLink}
+		cardType={cardStyleType}
 		onSubmitSuccess={handleLeadSubmitted}
 	/>
 {/if}

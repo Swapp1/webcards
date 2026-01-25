@@ -181,6 +181,7 @@ export const trackContactSave = async (
         await updateDoc(statsRef, {
             totalSaves: increment(1),
             [`dailyStats.${dateKey}.saves`]: increment(1),
+            [`dailyStats.${dateKey}.newContacts`]: increment(1),
             updatedAt: serverTimestamp()
         });
 
@@ -196,5 +197,45 @@ export const trackContactSave = async (
         }
     } catch (error) {
         console.error('Error tracking contact save:', error);
+    }
+};
+
+// Track lead capture submission
+export const trackLeadCapture = async (
+    cardId: string,
+    cardOwnerId: string | undefined,
+    cardType: string,
+    cardOwnerName: string
+) => {
+    if (!browser) return;
+
+    const viewerId = getViewerId();
+    if (!viewerId || !cardOwnerId) return;
+
+    // Don't track self-submissions
+    if (isSelfView(cardOwnerId, viewerId)) return;
+
+    try {
+        const statsRef = doc(db, 'card_stats', cardId);
+        const dateKey = getDateKey();
+
+        await updateDoc(statsRef, {
+            totalLeads: increment(1),
+            [`dailyStats.${dateKey}.leads`]: increment(1),
+            updatedAt: serverTimestamp()
+        });
+
+        // Also log to Firebase Analytics if available
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+            (window as any).gtag('event', 'lead_capture_submitted', {
+                card_id: cardId,
+                viewer_id: viewerId,
+                card_owner_id: cardOwnerId,
+                card_owner_name: cardOwnerName,
+                card_type: cardType
+            });
+        }
+    } catch (error) {
+        console.error('Error tracking lead capture:', error);
     }
 };
