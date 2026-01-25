@@ -4,25 +4,27 @@
 	import { getStyleConfig, type CardStyleType } from '$lib/config/card-styles';
 
 	let {
-		src,
-		detail,
-		link,
+		src = '',
+		detail = '',
+		link = '',
 		isColor,
 		textColor = null,
 		customIcon,
 		customName,
 		customTitle,
-		cardStyleType = 'original'
+		cardStyleType = 'original',
+		onClick
 	}: {
-		src: string;
-		detail: string;
-		link: string;
+		src?: string;
+		detail?: string;
+		link?: string;
 		isColor: boolean;
 		textColor?: 'black' | 'white' | null;
 		customIcon?: string;
 		customName?: string;
 		customTitle?: string;
 		cardStyleType?: CardStyleType;
+		onClick?: () => void;
 	} = $props();
 
 	const styleConfig = $derived(getStyleConfig(cardStyleType));
@@ -58,6 +60,7 @@
 		!isColor && 'bg-white dark:bg-[#1E1E1E]'
 	)}
 	style="border-radius: {styleConfig.tileBorderRadius}px;"
+	onclick={onClick}
 >
 	{#if customIcon}
 		<img

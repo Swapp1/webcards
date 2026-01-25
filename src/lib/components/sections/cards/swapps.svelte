@@ -11,12 +11,14 @@
 		swapps,
 		isColor,
 		textColor = null,
-		cardStyleType = 'original'
+		cardStyleType = 'original',
+		onContentClick
 	}: {
 		swapps: SwappsTypes[];
 		isColor: boolean;
 		textColor?: 'black' | 'white' | null;
 		cardStyleType?: CardStyleType;
+		onContentClick?: (contentType: string) => void;
 	} = $props();
 
 	const styleConfig = $derived(getStyleConfig(cardStyleType));
@@ -65,6 +67,7 @@
 					detail={swapp.detail}
 					link={swapp.extras.attachmentFilePath}
 					{cardStyleType}
+					onClick={() => onContentClick?.(swapp.title)}
 				/>
 			</div>
 		{:else if swapp.type === 'phoneNumber'}
@@ -79,6 +82,7 @@
 					customName={swapp.extras?.customName}
 					customTitle={swapp.extras?.customTitle}
 					{cardStyleType}
+					onClick={() => onContentClick?.(swapp.title)}
 				/>
 			</div>
 		{:else if swapp.title === 'Link'}
@@ -93,6 +97,7 @@
 					customName={swapp.extras?.customName}
 					customTitle={swapp.extras?.customTitle}
 					{cardStyleType}
+					onClick={() => onContentClick?.(swapp.extras?.customName || 'link')}
 				/>
 			</div>
 		{:else}
@@ -107,6 +112,7 @@
 					customName={swapp.extras?.customName}
 					customTitle={swapp.extras?.customTitle}
 					{cardStyleType}
+					onClick={() => onContentClick?.(swapp.title)}
 				/>
 			</div>
 		{/if}

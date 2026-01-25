@@ -5,19 +5,19 @@
 	import Swapps from '$lib/components/sections/cards/swapps.svelte';
 	import { cn } from '$lib/utils';
 
-	import { Drawer } from 'vaul-svelte';
 	import { getTextColor } from '$lib/utils/color';
 
 	import CardInfo from '$lib/components/sections/cards/card-info.svelte';
 	import FloatingBtn from '$lib/components/sections/nav/floating-btn.svelte';
 	import Footer from '$lib/components/sections/nav/footer.svelte';
-
-	import DrawerIcon from '$lib/assets/add-contact.svg';
-	import ActionBtn from '$lib/components/sections/cards/action-btn.svelte';
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import { argbToHex, hexToRgba } from '$lib/hooks/icons';
-	import { tick } from 'svelte';
+	import { tick, onMount } from 'svelte';
 	import { parseCardStyleType, getStyleConfig, type CardStyleType } from '$lib/config/card-styles';
+	import LeadCaptureSheet from '$lib/components/sections/cards/lead-capture-sheet.svelte';
+	import StickyActionBar from '$lib/components/sections/cards/sticky-action-bar.svelte';
+	import { trackCardView, trackContentClick, trackContactSave } from '$lib/firebase/analytics';
+	import { browser } from '$app/environment';
 
 	let { data }: { data: PageData } = $props();
 
@@ -25,35 +25,70 @@
 
 	const isCardPersonal = $state(card.type === 'personal');
 
-	// Style switcher for testing
-	const allStyles: CardStyleType[] = ['original', 'cover', 'classic', 'pro', 'minimal'];
-	let currentStyleIndex = $state(0);
-	let isStyleSwitcherOpen = $state(false);
+	// Lead capture state
+	let showLeadCapture = $state(false);
 
-	// Parse card style type (with backward compatibility) - now overridable
-	const baseStyleType = $derived(parseCardStyleType(card.cardStyleType));
+	// Check if user already submitted lead form
+	const getSubmittedKey = () => `swapp_lead_submitted_${card.personalizedLink}`;
+	let hasAlreadySubmittedLead = $state(false);
 
-	// Use overridden style if set, otherwise use base
+	// Initialize on mount
 	$effect(() => {
-		currentStyleIndex = allStyles.indexOf(baseStyleType);
+		if (browser) {
+			hasAlreadySubmittedLead = localStorage.getItem(getSubmittedKey()) === 'true';
+		}
 	});
 
-	const cardStyleType = $derived(allStyles[currentStyleIndex]);
+	// Callback when lead is submitted
+	const handleLeadSubmitted = () => {
+		hasAlreadySubmittedLead = true;
+	};
+
+	// Track card view and open lead capture on mount
+	onMount(() => {
+		// Track the card view
+		trackCardView(
+			card.personalizedLink,
+			card.ownerId,
+			card.type,
+			card.displayName
+		);
+
+		// Open lead capture sheet if enabled
+		if (card.leadCapture && card.ownerId) {
+			setTimeout(() => {
+				showLeadCapture = true;
+			}, 500);
+		}
+	});
+
+	// Function to track content clicks (passed to child components)
+	const handleContentClick = (contentType: string) => {
+		trackContentClick(
+			card.personalizedLink,
+			card.ownerId,
+			contentType,
+			card.type,
+			card.displayName
+		);
+	};
+
+	// Function to track contact saves
+	const handleContactSave = () => {
+		trackContactSave(
+			card.personalizedLink,
+			card.ownerId,
+			card.type,
+			card.displayName
+		);
+	};
+
+	// Reference to StickyActionBar to open menu
+	let stickyActionBar: StickyActionBar;
+
+	// Parse card style type (with backward compatibility)
+	const cardStyleType = $derived(parseCardStyleType(card.cardStyleType));
 	const styleConfig = $derived(getStyleConfig(cardStyleType));
-
-	// Style switcher functions
-	function nextStyle() {
-		currentStyleIndex = (currentStyleIndex + 1) % allStyles.length;
-	}
-
-	function prevStyle() {
-		currentStyleIndex = (currentStyleIndex - 1 + allStyles.length) % allStyles.length;
-	}
-
-	function selectStyle(index: number) {
-		currentStyleIndex = index;
-		isStyleSwitcherOpen = false;
-	}
 
 	// Normalise et valide la couleur
 	const normalizeColor = (color: string | undefined | null): string | null => {
@@ -267,7 +302,11 @@
 	<meta name="twitter:image" content={card.profilePicture} />
 
 	<!-- Preload profile image for faster LCP -->
-	<link rel="preload" as="image" href={card.profilePicture} />
+	<link rel="preload" as="image" href={card.profilePicture} fetchpriority="high" />
+
+	<!-- DNS prefetch for external resources -->
+	<link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
+	<link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin="anonymous" />
 </svelte:head>
 
 {#if imgLoading && !showCircularProfile}
@@ -302,37 +341,6 @@
 	'relative flex w-full justify-center sm:h-screen sm:overflow-hidden',
 	`card-style-${cardStyleType}`
 )}>
-	<!-- Style Switcher Button (top right) -->
-	<div class="fixed top-4 right-4 z-[100] flex flex-col items-end gap-2">
-		<button
-			onclick={() => isStyleSwitcherOpen = !isStyleSwitcherOpen}
-			class="flex items-center gap-2 rounded-full bg-black/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-all hover:bg-black/90"
-		>
-			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-			</svg>
-			{cardStyleType}
-		</button>
-
-		{#if isStyleSwitcherOpen}
-			<div class="flex flex-col gap-1 rounded-xl bg-black/80 p-2 shadow-lg backdrop-blur-sm">
-				{#each allStyles as style, i}
-					<button
-						onclick={() => selectStyle(i)}
-						class={cn(
-							'rounded-lg px-4 py-2 text-left text-sm font-medium transition-all',
-							cardStyleType === style
-								? 'bg-white text-black'
-								: 'text-white hover:bg-white/20'
-						)}
-					>
-						{style}
-					</button>
-				{/each}
-			</div>
-		{/if}
-	</div>
-
 	<!-- Desktop background -->
 	{#if showCircularProfile}
 		<!-- Solid color background for pro/minimal styles (contrasted) -->
@@ -360,6 +368,7 @@
 			"relative flex h-auto w-full flex-col sm:max-w-[48rem] sm:rounded-xl sm:mb-10",
 			"sm:shadow-[0_0_60px_-15px_rgba(0,0,0,0.3)]"
 		)}>
+			<!-- Desktop only: Create your card button -->
 			<FloatingBtn color={coloredBg ?? undefined} pic={card.profilePicture} {textColor} />
 
 			<!-- PRO & MINIMAL STYLES: Circular Profile Photo Layout -->
@@ -370,36 +379,20 @@
 				>
 					<!-- Mobile header -->
 					<div class="absolute top-5 flex w-full items-center justify-between px-4 sm:justify-center">
-						<Drawer.Root shouldScaleBackground>
-							<Drawer.Trigger class="sm:hidden">
-								<img src={DrawerIcon} alt="Icon" width={25} height={25} class="h-[25px] w-[25px]" />
-							</Drawer.Trigger>
-							<Drawer.Portal>
-								<Drawer.Overlay class="fixed inset-0 bg-black/40" />
-								<Drawer.Content
-									class={cn(
-										'fixed bottom-0 z-20 flex h-1/5 w-full items-start justify-center rounded-t-[1.25rem] !bg-[var(--action-drawer)] pt-6 focus-visible:outline-none',
-										'animate-in slide-in-from-bottom transition-all duration-300 ease-out'
-									)}
-								>
-									<ActionBtn
-										pic={card.profilePicture}
-										text="Add to phone contacts"
-										className={cn(
-											'w-3/4 text-[0.9375rem] leading-[0.9375rem]',
-											coloredBg && textColor === 'black' && '!bg-white !text-black',
-											coloredBg && textColor === 'white' && '!bg-black !text-white',
-											!coloredBg && '!bg-black !text-white'
-										)}
-										swapps={card.swapps}
-										name={card.displayName}
-										title={card.heading}
-									/>
-								</Drawer.Content>
-							</Drawer.Portal>
-						</Drawer.Root>
-
+						<!-- Logo (left) -->
 						<Logo className="sm:hidden" />
+						<!-- Menu Button (right) -->
+						<button
+							type="button"
+							onclick={() => stickyActionBar?.openMenu()}
+							class="flex h-11 w-11 items-center justify-center rounded-full bg-black/20 shadow-lg backdrop-blur-[15px] sm:hidden"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="1"/>
+								<circle cx="12" cy="5" r="1"/>
+								<circle cx="12" cy="19" r="1"/>
+							</svg>
+						</button>
 					</div>
 
 					<!-- Circular Profile Photo -->
@@ -510,7 +503,7 @@
 					{:else if cardStyleType === 'minimal'}
 						<!-- Minimal style: text directly without card background -->
 						<div
-							class="mt-6 mb-2 w-full px-6 text-center"
+							class="mt-6 mb-0 w-full px-6 text-center"
 							style:color={coloredBg ? (textColor === 'black' ? 'black' : 'white') : 'black'}
 						>
 							<!-- Desktop name -->
@@ -545,14 +538,14 @@
 							{#if card.bio}
 								<!-- Desktop bio (70%) -->
 								<p
-									class="mx-auto mt-6 max-w-[70%] opacity-60 hidden sm:block"
+									class="mx-auto mt-4 max-w-[70%] opacity-60 hidden sm:block"
 									style="font-size: {styleConfig.bioFontSize}px; font-weight: {styleConfig.bioFontWeight};"
 								>
 									{card.bio}
 								</p>
 								<!-- Mobile bio (85%, -1px) -->
 								<p
-									class="mx-auto mt-6 max-w-[85%] opacity-60 sm:hidden"
+									class="mx-auto mt-4 max-w-[85%] opacity-60 sm:hidden"
 									style="font-size: {styleConfig.bioFontSize - 1}px; font-weight: {styleConfig.bioFontWeight};"
 								>
 									{card.bio}
@@ -603,43 +596,36 @@
 					/>
 
 					<div class="absolute top-5 flex w-full items-center justify-between px-4 sm:justify-center">
-						<Drawer.Root shouldScaleBackground>
-							<Drawer.Trigger class="sm:hidden">
-								<img src={DrawerIcon} alt="Icon" width={25} height={25} class="h-[25px] w-[25px]" />
-							</Drawer.Trigger>
-							<Drawer.Portal>
-								<Drawer.Overlay class="fixed inset-0 bg-black/40" />
-								<Drawer.Content
-									class={cn(
-										'fixed bottom-0 z-20 flex h-1/5 w-full items-start justify-center rounded-t-[1.25rem] !bg-[var(--action-drawer)] pt-6 focus-visible:outline-none',
-										'animate-in slide-in-from-bottom transition-all duration-300 ease-out'
-									)}
+						<!-- Logo (left) on mobile -->
+						<div class="flex items-center gap-3 sm:hidden">
+							<Logo />
+							{#if !isCardPersonal && card.professionalCardType === 'jobSeeker'}
+								<Badge
+									class="flex gap-[7px] rounded-lg bg-black/30 px-4 py-3 text-xs leading-3 backdrop-blur-[20px] dark:text-white md:text-sm"
+									>Looking for work <span class="h-2 w-2 rounded-full bg-white"></span></Badge
 								>
-									<ActionBtn
-										pic={card.profilePicture}
-										text="Add to phone contacts"
-										className={cn(
-											'w-3/4 text-[0.9375rem] leading-[0.9375rem]',
-											coloredBg && textColor === 'black' && '!bg-white !text-black',
-											coloredBg && textColor === 'white' && '!bg-black !text-white',
-											!coloredBg && '!bg-black !text-white'
-										)}
-										swapps={card.swapps}
-										name={card.displayName}
-										title={card.heading}
-									/>
-								</Drawer.Content>
-							</Drawer.Portal>
-						</Drawer.Root>
-
+							{/if}
+						</div>
+						<!-- Desktop: jobSeeker badge only -->
 						{#if !isCardPersonal && card.professionalCardType === 'jobSeeker'}
 							<Badge
-								class="flex gap-[7px] rounded-lg bg-black/30 px-4 py-3 text-xs leading-3 backdrop-blur-[20px] dark:text-white md:text-sm"
+								class="hidden gap-[7px] rounded-lg bg-black/30 px-4 py-3 text-xs leading-3 backdrop-blur-[20px] dark:text-white sm:flex md:text-sm"
 								>Looking for work <span class="h-2 w-2 rounded-full bg-white"></span></Badge
 							>
 						{/if}
 
-						<Logo className="sm:hidden" />
+						<!-- Menu Button (right) on mobile -->
+						<button
+							type="button"
+							onclick={() => stickyActionBar?.openMenu()}
+							class="flex h-11 w-11 items-center justify-center rounded-full bg-black/20 shadow-lg backdrop-blur-[15px] sm:hidden"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="1"/>
+								<circle cx="12" cy="5" r="1"/>
+								<circle cx="12" cy="19" r="1"/>
+							</svg>
+						</button>
 					</div>
 
 					<!-- COVER STYLE: Centered name with gradient -->
@@ -763,6 +749,21 @@
 								{/each}
 							</div>
 						{/if}
+
+						<!-- Save Contact Button for Classic Style -->
+						<button
+							type="button"
+							onclick={() => stickyActionBar?.downloadVCF()}
+							class="mt-6 flex items-center justify-center gap-2 self-start rounded-xl bg-black px-6 py-3 font-inter text-[15px] font-semibold text-white transition-all active:scale-[0.97] dark:bg-white dark:text-black sm:hidden"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+								<circle cx="9" cy="7" r="4"/>
+								<line x1="19" x2="19" y1="8" y2="14"/>
+								<line x1="22" x2="16" y1="11" y2="11"/>
+							</svg>
+							Save Contact
+						</button>
 					</div>
 				{/if}
 
@@ -781,6 +782,7 @@
 						isColor={!!coloredBg}
 						{textColor}
 						{cardStyleType}
+						onContentClick={handleContentClick}
 					/>
 					<Footer isColor={!!coloredBg} {textColor} />
 				</div>
@@ -794,3 +796,29 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Sticky Action Bar (Mobile only) -->
+<StickyActionBar
+	bind:this={stickyActionBar}
+	showLeadCapture={!!card.leadCapture && !!card.ownerId}
+	hasAlreadySubmitted={hasAlreadySubmittedLead}
+	name={card.displayName}
+	title={card.heading}
+	pic={card.profilePicture}
+	swapps={card.swapps}
+	onConnect={() => showLeadCapture = true}
+	onSaveContact={handleContactSave}
+	{cardStyleType}
+/>
+
+<!-- Lead Capture Sheet -->
+{#if card.leadCapture && card.ownerId}
+	<LeadCaptureSheet
+		bind:open={showLeadCapture}
+		ownerName={card.displayName}
+		ownerPhoto={card.profilePicture}
+		ownerId={card.ownerId}
+		cardId={card.personalizedLink}
+		onSubmitSuccess={handleLeadSubmitted}
+	/>
+{/if}

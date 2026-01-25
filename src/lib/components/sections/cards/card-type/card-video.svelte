@@ -2,14 +2,14 @@
 	import { getStyleConfig, type CardStyleType } from '$lib/config/card-styles';
 
 	let {
-		src,
-		alt,
-		thumbnail,
+		src = '',
+		alt = '',
+		thumbnail = '',
 		cardStyleType = 'original'
 	}: {
-		src: string;
-		alt: string;
-		thumbnail: string;
+		src?: string;
+		alt?: string;
+		thumbnail?: string;
 		cardStyleType?: CardStyleType;
 	} = $props();
 
@@ -22,7 +22,8 @@
 	title={alt}
 	aria-label={alt}
 	controls
-	preload="metadata"
+	preload="none"
+	playsinline
 	class="aspect-video w-full object-cover"
 	style="border-radius: {styleConfig.tileBorderRadius}px;"
 	width="628"

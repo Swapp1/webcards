@@ -3,12 +3,12 @@
 	import { getStyleConfig, type CardStyleType } from '$lib/config/card-styles';
 
 	let {
-		src,
-		alt,
+		src = '',
+		alt = '',
 		cardStyleType = 'original'
 	}: {
-		src: string;
-		alt: string;
+		src?: string;
+		alt?: string;
 		cardStyleType?: CardStyleType;
 	} = $props();
 

@@ -12,7 +12,8 @@
 		className,
 		title,
 		pic,
-		org
+		org,
+		onSave
 	}: {
 		text: string;
 		name: string;
@@ -21,6 +22,7 @@
 		title: string;
 		pic: string;
 		org?: string;
+		onSave?: () => void;
 	} = $props();
 
 	async function optimizeImage(imageUrl: string, maxWidth = 300, maxHeight = 300) {
@@ -101,6 +103,9 @@
 			a.click();
 			window.URL.revokeObjectURL(url);
 			window.scrollTo({ top: 0, behavior: 'smooth' });
+
+			// Track the save
+			onSave?.();
 		} finally {
 			loading = false;
 		}

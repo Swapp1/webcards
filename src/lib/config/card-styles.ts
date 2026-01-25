@@ -205,7 +205,7 @@ export const cardStyleConfigs: Record<CardStyleType, CardStyleConfig> = {
     descOpacity: 1,
     bioFontSize: 15,
     bioFontWeight: 420,
-    bioTopSpacing: 20,
+    bioTopSpacing: 12,
     tileBorderRadius: 18,
     companyLogoSize: 62,
     companyLogoPosition: 'coverBottomRight',

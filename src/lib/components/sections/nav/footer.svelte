@@ -45,7 +45,7 @@
 	</div>
 
 	<!-- Powered by Swapp (centered, below, on one line) -->
-	<a href="https://download.swapp.fr" target="_blank" class="mt-4 flex items-center gap-1.5">
+	<a href="https://download.swapp.fr" target="_blank" class="mt-4 flex items-center gap-2">
 		<span
 			class={cn(
 				'text-sm font-light',
@@ -56,6 +56,7 @@
 		>
 			Powered by
 		</span>
+		<img src="/swapp.svg" alt="Swapp" class="h-4 w-4" />
 		<span class="text-sm font-semibold">Swapp</span>
 	</a>
 </footer>
@@ -93,6 +94,7 @@
 		>
 			Powered by
 		</span>
+		<img src="/swapp.svg" alt="Swapp" class="h-4 w-4" />
 		<span class="text-base font-semibold">Swapp</span>
 	</a>
 

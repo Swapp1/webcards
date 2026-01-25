@@ -31,6 +31,7 @@ export interface CardData {
     displayName: string;
     profilePicture: string;
     heading: string;
+    ownerId?: string;
 
     // Type
     type: CardType;
@@ -54,6 +55,9 @@ export interface CardData {
     // Additional info
     bio?: string;
     keySkills?: string[];
+
+    // Lead capture
+    leadCapture?: boolean;
 
     // Content
     swapps: SwappsTypes[];
