@@ -204,6 +204,17 @@
 	50% { background-position: 100% 50%; }
 }
 
+/* Tile border radius responsive */
+.tile-radius {
+	border-radius: var(--tile-radius);
+}
+
+@media (min-width: 640px) {
+	.tile-radius {
+		border-radius: var(--tile-radius-desktop);
+	}
+}
+
 /* Owner info card styles */
 .owner-info-card {
 	@apply rounded-2xl px-5 py-4;

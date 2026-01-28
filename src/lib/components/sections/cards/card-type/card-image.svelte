@@ -16,19 +16,17 @@
 	let imgLoading = $state(true);
 </script>
 
-<div class="relative aspect-video w-full">
+<div class="relative aspect-video w-full" style="--tile-radius: {styleConfig.tileBorderRadius}px; --tile-radius-desktop: {styleConfig.tileBorderRadiusDesktop}px;">
 	{#if imgLoading}
 		<Skeleton
-			class="absolute inset-0 bg-black/30 dark:bg-white/30"
-			style="border-radius: {styleConfig.tileBorderRadius}px;"
+			class="absolute inset-0 bg-black/30 dark:bg-white/30 tile-radius"
 		/>
 	{/if}
 	<img
 		{src}
 		{alt}
-		class="animate-touch aspect-video w-full object-cover"
+		class="animate-touch aspect-video w-full object-cover tile-radius"
 		class:opacity-0={imgLoading}
-		style="border-radius: {styleConfig.tileBorderRadius}px;"
 		width="628"
 		height="360"
 		loading="lazy"

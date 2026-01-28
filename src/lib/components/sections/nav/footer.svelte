@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
+	import { getFooterTexts } from '$lib/utils/locale';
+
+	const t = getFooterTexts();
 
 	let {
 		isColor,
@@ -44,7 +47,7 @@
 		</a>
 	</div>
 
-	<!-- Powered by Swapp (centered, below, on one line) -->
+	<!-- {t.poweredBy} Swapp (centered, below, on one line) -->
 	<a href="https://download.swapp.fr" target="_blank" class="mt-4 flex items-center gap-2">
 		<span
 			class={cn(
@@ -54,7 +57,7 @@
 				!isColor && 'text-black/60 dark:text-white/60'
 			)}
 		>
-			Powered by
+			{t.poweredBy}
 		</span>
 		<img src="/swapp.svg" alt="Swapp" class="h-4 w-4" />
 		<span class="text-sm font-semibold">Swapp</span>
@@ -92,7 +95,7 @@
 				!isColor && 'text-black/60 dark:text-white/60'
 			)}
 		>
-			Powered by
+			{t.poweredBy}
 		</span>
 		<img src="/swapp.svg" alt="Swapp" class="h-4 w-4" />
 		<span class="text-base font-semibold">Swapp</span>

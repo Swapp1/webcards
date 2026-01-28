@@ -24,8 +24,8 @@
 	controls
 	preload="none"
 	playsinline
-	class="aspect-video w-full object-cover"
-	style="border-radius: {styleConfig.tileBorderRadius}px;"
+	class="aspect-video w-full object-cover tile-radius"
+	style="--tile-radius: {styleConfig.tileBorderRadius}px; --tile-radius-desktop: {styleConfig.tileBorderRadiusDesktop}px;"
 	width="628"
 	height="360"
 >

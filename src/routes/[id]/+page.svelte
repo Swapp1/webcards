@@ -17,7 +17,10 @@
 	import LeadCaptureSheet from '$lib/components/sections/cards/lead-capture-sheet.svelte';
 	import StickyActionBar from '$lib/components/sections/cards/sticky-action-bar.svelte';
 	import { trackCardView, trackContentClick, trackContactSave } from '$lib/firebase/analytics';
+	import { getActionBarTexts } from '$lib/utils/locale';
 	import { browser } from '$app/environment';
+
+	const t = getActionBarTexts();
 
 	let { data }: { data: PageData } = $props();
 
@@ -275,7 +278,7 @@
 	<meta name="description" content="Swapp - Digital cards" />
 
 	<!-- Facebook Meta Tags -->
-	<meta property="og:url" content={`https://cards.swapp.fr/${params}`} />
+	<meta property="og:url" content={`https://swapp.fr/${params}`} />
 	<meta property="og:type" content="website" />
 	<meta
 		property="og:title"
@@ -290,8 +293,8 @@
 
 	<!-- Twitter Meta Tags -->
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta property="twitter:domain" content="cards.swapp.fr" />
-	<meta property="twitter:url" content={`https://cards.swapp.fr/${params}`} />
+	<meta property="twitter:domain" content="swapp.fr" />
+	<meta property="twitter:url" content={`https://swapp.fr/${params}`} />
 	<meta
 		name="twitter:title"
 		content={!isCardPersonal && card.professionalCardType === 'staff'
@@ -762,7 +765,7 @@
 								<line x1="19" x2="19" y1="8" y2="14"/>
 								<line x1="22" x2="16" y1="11" y2="11"/>
 							</svg>
-							Save Contact
+							{t.saveContact}
 						</button>
 					</div>
 				{/if}

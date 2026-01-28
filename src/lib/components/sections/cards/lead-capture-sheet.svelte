@@ -3,6 +3,7 @@
 	import { cn } from '$lib/utils';
 	import { submitLead, type LeadData } from '$lib/firebase/cards';
 	import { trackLeadCapture } from '$lib/firebase/analytics';
+	import { getLeadCaptureTexts } from '$lib/utils/locale';
 	import { browser } from '$app/environment';
 
 	let {
@@ -22,6 +23,8 @@
 		cardType?: string;
 		onSubmitSuccess?: () => void;
 	} = $props();
+
+	const t = getLeadCaptureTexts();
 
 	let name = $state('');
 	let email = $state('');
@@ -83,7 +86,7 @@
 			phone = '';
 			job = '';
 		} catch (e) {
-			errorMsg = 'Une erreur est survenue. Veuillez réessayer.';
+			errorMsg = t.error;
 			console.error('Lead submission error:', e);
 		} finally {
 			isSubmitting = false;
@@ -118,7 +121,7 @@
 					class="font-inter text-white"
 					style="font-size: 28px; font-weight: 700; letter-spacing: -1px;"
 				>
-					Partagez votre contact
+					{t.title}
 				</h2>
 				<div class="mt-2 flex items-center gap-2">
 					<img
@@ -130,34 +133,42 @@
 						class="font-inter text-white/40"
 						style="font-size: 17px; font-weight: 500;"
 					>
-						Envoyer a {ownerName}
+						{t.subtitle} {ownerName}
 					</p>
 				</div>
 			</div>
 
 			<!-- Form -->
-			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="flex flex-col gap-3">
+			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="flex flex-col gap-3" autocomplete="on">
 				<input
 					type="text"
-					placeholder="Your Name"
+					name="name"
+					autocomplete="name"
+					placeholder={t.namePlaceholder}
 					bind:value={name}
 					class={inputClass}
 				/>
 				<input
 					type="email"
-					placeholder="Email"
+					name="email"
+					autocomplete="email"
+					placeholder={t.emailPlaceholder}
 					bind:value={email}
 					class={inputClass}
 				/>
 				<input
 					type="tel"
-					placeholder="Phone number"
+					name="phone"
+					autocomplete="tel"
+					placeholder={t.phonePlaceholder}
 					bind:value={phone}
 					class={inputClass}
 				/>
 				<input
 					type="text"
-					placeholder="Your job"
+					name="job"
+					autocomplete="organization-title"
+					placeholder={t.jobPlaceholder}
 					bind:value={job}
 					class={inputClass}
 				/>
@@ -176,7 +187,7 @@
 							: 'bg-white/10 text-white/40 cursor-not-allowed'
 					)}
 				>
-					{isSubmitting ? 'Envoi...' : 'Connect'}
+					{isSubmitting ? t.submitting : t.submitButton}
 				</button>
 			</form>
 		</Drawer.Content>

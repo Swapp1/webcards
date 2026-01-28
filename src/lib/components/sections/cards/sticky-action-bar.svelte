@@ -4,6 +4,9 @@
 	import { Drawer } from 'vaul-svelte';
 	import { onMount } from 'svelte';
 	import type { CardStyleType } from '$lib/config/card-styles';
+	import { getActionBarTexts } from '$lib/utils/locale';
+
+	const t = getActionBarTexts();
 
 	let {
 		showLeadCapture = false,
@@ -173,7 +176,7 @@
 							<line x1="22" x2="16" y1="11" y2="11"/>
 						</svg>
 					</div>
-					<span class="text-[16px] font-medium text-white">Add to Contacts</span>
+					<span class="text-[16px] font-medium text-white">{t.addToContacts}</span>
 				</button>
 
 				<!-- Share my Info (only if lead capture enabled) -->
@@ -190,7 +193,7 @@
 								<line x1="12" x2="12" y1="2" y2="15"/>
 							</svg>
 						</div>
-						<span class="text-[16px] font-medium text-white">Share my Info</span>
+						<span class="text-[16px] font-medium text-white">{t.shareMyInfo}</span>
 					</button>
 				{/if}
 
@@ -208,13 +211,13 @@
 							<path d="M8 12h8"/>
 						</svg>
 					</div>
-					<span class="text-[16px] font-medium text-white">Create my free card</span>
+					<span class="text-[16px] font-medium text-white">{t.createFreeCard}</span>
 				</a>
 			</div>
 
 			<!-- Footer -->
 			<div class="mt-6 flex items-center justify-center gap-2 text-sm text-white/40">
-				<span>Powered by</span>
+				<span>{t.poweredBy}</span>
 				<a href="https://swapp.fr" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 font-medium text-white/60">
 					<img src="/swapp.svg" alt="Swapp" class="h-4 w-4" />
 					Swapp
@@ -240,9 +243,9 @@
 				<button
 					type="button"
 					onclick={onConnect}
-					class="flex items-center justify-center rounded-full bg-black px-6 py-3 font-inter text-[15px] font-semibold text-white shadow-lg shadow-black/20 transition-all active:scale-[0.97]"
+					class="flex items-center justify-center rounded-full bg-black px-7 py-3.5 font-inter text-base font-semibold text-white shadow-lg shadow-black/20 transition-all active:scale-[0.97]"
 				>
-					Connect
+					{t.connect}
 				</button>
 
 				<!-- Save Contact Button -->
@@ -250,14 +253,14 @@
 					type="button"
 					onclick={downloadVCF}
 					disabled={loading}
-					class="flex items-center justify-center rounded-full bg-white px-6 py-3 font-inter text-[15px] font-semibold text-black shadow-lg shadow-black/10 transition-all active:scale-[0.97] disabled:opacity-50"
+					class="flex items-center justify-center rounded-full bg-white px-7 py-3.5 font-inter text-base font-semibold text-black shadow-lg shadow-black/10 transition-all active:scale-[0.97] disabled:opacity-50"
 				>
 					{#if loading}
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px] animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M21 12a9 9 0 1 1-6.219-8.56" />
 						</svg>
 					{:else}
-						Save
+						{t.save}
 					{/if}
 				</button>
 			{:else}
@@ -266,14 +269,14 @@
 					type="button"
 					onclick={downloadVCF}
 					disabled={loading}
-					class="flex items-center justify-center rounded-full bg-black px-8 py-3.5 font-inter text-base font-semibold text-white shadow-lg shadow-black/20 transition-all active:scale-[0.97] disabled:opacity-50"
+					class="flex items-center justify-center rounded-full bg-black px-9 py-4 font-inter text-[17px] font-semibold text-white shadow-lg shadow-black/20 transition-all active:scale-[0.97] disabled:opacity-50"
 				>
 					{#if loading}
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M21 12a9 9 0 1 1-6.219-8.56" />
 						</svg>
 					{:else}
-						Save Contact
+						{t.saveContact}
 					{/if}
 				</button>
 			{/if}

@@ -31,6 +31,7 @@ export interface CardStyleConfig {
 
   // Tile styling
   tileBorderRadius: number;
+  tileBorderRadiusDesktop: number;
 
   // Company logo
   companyLogoSize: number;
@@ -78,7 +79,8 @@ export const cardStyleConfigs: Record<CardStyleType, CardStyleConfig> = {
     bioFontSize: 15,
     bioFontWeight: 420,
     bioTopSpacing: 14,
-    tileBorderRadius: 18,
+    tileBorderRadius: 20,
+    tileBorderRadiusDesktop: 28,
     companyLogoSize: 85,
     companyLogoPosition: 'topRight',
     companyLogoBorderWidth: 3,
@@ -110,7 +112,8 @@ export const cardStyleConfigs: Record<CardStyleType, CardStyleConfig> = {
     bioFontSize: 14,
     bioFontWeight: 400,
     bioTopSpacing: 12,
-    tileBorderRadius: 16,
+    tileBorderRadius: 18,
+    tileBorderRadiusDesktop: 26,
     companyLogoSize: 0,
     companyLogoPosition: 'none',
     companyLogoBorderWidth: 0,
@@ -142,7 +145,8 @@ export const cardStyleConfigs: Record<CardStyleType, CardStyleConfig> = {
     bioFontSize: 15,
     bioFontWeight: 400,
     bioTopSpacing: 12,
-    tileBorderRadius: 12,
+    tileBorderRadius: 14,
+    tileBorderRadiusDesktop: 22,
     companyLogoSize: 60,
     companyLogoPosition: 'topRight',
     companyLogoBorderWidth: 0,
@@ -174,7 +178,8 @@ export const cardStyleConfigs: Record<CardStyleType, CardStyleConfig> = {
     bioFontSize: 13,
     bioFontWeight: 420,
     bioTopSpacing: 12,
-    tileBorderRadius: 10,
+    tileBorderRadius: 12,
+    tileBorderRadiusDesktop: 20,
     companyLogoSize: 40,
     companyLogoPosition: 'coverBottomRight',
     companyLogoBorderWidth: 3,
@@ -206,7 +211,8 @@ export const cardStyleConfigs: Record<CardStyleType, CardStyleConfig> = {
     bioFontSize: 15,
     bioFontWeight: 420,
     bioTopSpacing: 12,
-    tileBorderRadius: 18,
+    tileBorderRadius: 20,
+    tileBorderRadiusDesktop: 28,
     companyLogoSize: 62,
     companyLogoPosition: 'coverBottomRight',
     companyLogoBorderWidth: 3,

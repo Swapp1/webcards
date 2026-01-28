@@ -1,4 +1,17 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/swapp",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "cards.swapp.fr" }],
+      "destination": "https://swapp.fr/:path*",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/.well-known/apple-app-site-association",

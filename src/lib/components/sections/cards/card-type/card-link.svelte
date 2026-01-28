@@ -54,12 +54,12 @@
 	target={validLink ? '_blank' : undefined}
 	rel={validLink ? 'noopener noreferrer' : undefined}
 	class={cn(
-		'animate-touch flex items-center gap-4 px-4 py-3 md:px-[1.375rem] md:py-[1.125rem]',
+		'animate-touch flex items-center gap-4 px-4 py-3 md:px-[1.375rem] md:py-[1.125rem] tile-radius',
 		isColor && textColor === 'black' && 'bg-black/10',
 		isColor && textColor === 'white' && 'bg-white/20',
 		!isColor && 'bg-white dark:bg-[#1E1E1E]'
 	)}
-	style="border-radius: {styleConfig.tileBorderRadius}px;"
+	style="--tile-radius: {styleConfig.tileBorderRadius}px; --tile-radius-desktop: {styleConfig.tileBorderRadiusDesktop}px;"
 	onclick={onClick}
 >
 	{#if customIcon}
