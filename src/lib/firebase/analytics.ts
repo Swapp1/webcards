@@ -81,10 +81,6 @@ export const trackCardView = async (
             [`dailyStats.${dateKey}.views`]: increment(1)
         };
 
-        if (isNewViewer) {
-            dailyStatsUpdate[`dailyStats.${dateKey}.newContacts`] = increment(1);
-        }
-
         // Update the stats document
         await updateDoc(statsRef, {
             totalViews: increment(1),
@@ -159,7 +155,20 @@ export const trackContentClick = async (
     }
 };
 
-// Track contact save
+// Check if user already saved this card
+const hasSavedCard = (cardId: string): boolean => {
+    if (!browser) return false;
+    return localStorage.getItem(`swapp_saved_${cardId}`) === 'true';
+};
+
+// Mark card as saved in localStorage
+const markCardAsSaved = (cardId: string): void => {
+    if (browser) {
+        localStorage.setItem(`swapp_saved_${cardId}`, 'true');
+    }
+};
+
+// Track contact save (only once per user per card)
 export const trackContactSave = async (
     cardId: string,
     cardOwnerId: string | undefined,
@@ -174,6 +183,9 @@ export const trackContactSave = async (
     // Don't track self-saves
     if (isSelfView(cardOwnerId, viewerId)) return;
 
+    // Don't track if already saved this card
+    if (hasSavedCard(cardId)) return;
+
     try {
         const statsRef = doc(db, 'card_stats', cardId);
         const dateKey = getDateKey();
@@ -181,9 +193,11 @@ export const trackContactSave = async (
         await updateDoc(statsRef, {
             totalSaves: increment(1),
             [`dailyStats.${dateKey}.saves`]: increment(1),
-            [`dailyStats.${dateKey}.newContacts`]: increment(1),
             updatedAt: serverTimestamp()
         });
+
+        // Mark as saved to prevent duplicate tracking
+        markCardAsSaved(cardId);
 
         // Also log to Firebase Analytics if available
         if (typeof window !== 'undefined' && (window as any).gtag) {
