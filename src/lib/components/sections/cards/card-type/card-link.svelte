@@ -39,12 +39,15 @@
 		return '';
 	});
 
+	const noAtPrefixSources = ['Whatsapp number', 'Link', 'Cashapp', 'Google business'];
 	const haveAt = $derived(
-		src !== 'Whatsapp number' && src !== 'Link' && link ? '@' : ''
+		!noAtPrefixSources.includes(src) && link ? '@' : ''
 	);
 
 	const displayTitle = $derived(customTitle || customName || (src === 'Link' ? detail : src));
-	const displayDetail = $derived(src === 'Link' ? link : detail);
+	const displayDetail = $derived(
+		src === 'Link' ? link.replace(/^https?:\/\//, '') : detail
+	);
 
 	const [light, dark] = getIcons(src);
 </script>
