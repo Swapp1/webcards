@@ -35,19 +35,24 @@
 		}
 		if (src === 'Email' || src === 'Gmail') return `mailto:${detail}`;
 		if (src === 'Phone' || src === 'Phone number') return `tel:${detail}`;
-		if (link) return `${link}${detail}`;
+		if (link) {
+			// Avoid double protocol (e.g. link="https://" + detail="https://...")
+			if (detail.match(/^https?:\/\//i)) return detail;
+			return `${link}${detail}`;
+		}
 		return '';
 	});
 
-	const noAtPrefixSources = ['Whatsapp number', 'Link', 'Cashapp', 'Google business'];
+	const noAtPrefixSources = ['Whatsapp number', 'Link', 'Cashapp', 'Google Business'];
 	const haveAt = $derived(
 		!noAtPrefixSources.includes(src) && link ? '@' : ''
 	);
 
 	const displayTitle = $derived(customTitle || customName || (src === 'Link' ? detail : src));
-	const displayDetail = $derived(
-		src === 'Link' ? link.replace(/^https?:\/\//, '') : detail
-	);
+	const displayDetail = $derived.by(() => {
+		if (src === 'Link') return link.replace(/^https?:\/\//, '');
+		return detail.replace(/^https?:\/\//, '');
+	});
 
 	const [light, dark] = getIcons(src);
 </script>
