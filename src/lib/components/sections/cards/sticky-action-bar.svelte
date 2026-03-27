@@ -106,9 +106,11 @@
 		try {
 			let vcfData = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTITLE:${title}\n`;
 
-			const base64Image = await optimizeImage(pic);
-			if (base64Image) {
-				vcfData += `PHOTO;ENCODING=BASE64;TYPE=JPEG:${base64Image}\n`;
+			if (pic && pic.trim() !== '') {
+				const base64Image = await optimizeImage(pic);
+				if (base64Image) {
+					vcfData += `PHOTO;ENCODING=BASE64;TYPE=JPEG:${base64Image}\n`;
+				}
 			}
 
 			if (swapps && swapps.length > 0) {

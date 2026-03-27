@@ -16,6 +16,7 @@
 	import { parseCardStyleType, getStyleConfig, type CardStyleType } from '$lib/config/card-styles';
 	import LeadCaptureSheet from '$lib/components/sections/cards/lead-capture-sheet.svelte';
 	import StickyActionBar from '$lib/components/sections/cards/sticky-action-bar.svelte';
+	import InAppBrowserBanner from '$lib/components/sections/nav/in-app-browser-banner.svelte';
 	import { trackCardView, trackContentClick, trackContactSave } from '$lib/firebase/analytics';
 	import { getActionBarTexts } from '$lib/utils/locale';
 	import { browser } from '$app/environment';
@@ -140,13 +141,21 @@
 		return `rgb(${newR}, ${newG}, ${newB})`;
 	};
 
+	const hasProfilePicture = $derived(!!card.profilePicture && card.profilePicture.trim() !== '');
 	let imgLoading = $state(true);
 	let cardScrollElement: HTMLDivElement | undefined = $state();
 	let isCardScrollable = $state(false);
 	let imgHeight = $state(0);
-	let imgEl: HTMLImageElement | undefined = $state();
+	let imgEl: HTMLImageElement | HTMLDivElement | undefined = $state();
 	let windowWidth = $state(0);
 	let topH = $state(0);
+
+	// If no profile picture, skip loading state immediately
+	$effect(() => {
+		if (!hasProfilePicture) {
+			imgLoading = false;
+		}
+	});
 
 	// Sync window width
 	$effect(() => {
@@ -305,14 +314,19 @@
 	<meta name="twitter:image" content={card.profilePicture} />
 
 	<!-- Preload profile image for faster LCP -->
-	<link rel="preload" as="image" href={card.profilePicture} fetchpriority="high" />
+	{#if hasProfilePicture}
+		<link rel="preload" as="image" href={card.profilePicture} fetchpriority="high" />
+	{/if}
 
 	<!-- DNS prefetch for external resources -->
 	<link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
 	<link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin="anonymous" />
 </svelte:head>
 
-{#if imgLoading && !showCircularProfile}
+<!-- In-app browser detection banner -->
+<InAppBrowserBanner />
+
+{#if imgLoading && !showCircularProfile && hasProfilePicture}
 	<div class="fixed z-[60] h-screen w-full bg-background">
 		<div class="h-screen w-full bg-zinc-800">
 			<div class={cn('relative flex w-full justify-center sm:h-screen sm:overflow-hidden')}>
@@ -353,14 +367,21 @@
 		></div>
 	{:else}
 		<!-- Blurred image background for original/cover/classic styles -->
-		<img
-			src={card.profilePicture}
-			alt={card.displayName}
-			class="pointer-events-none absolute hidden h-screen w-full scale-105 object-cover opacity-70 filter sm:flex"
-		/>
-		<div
-			class={cn('pointer-events-none absolute hidden h-screen w-full backdrop-blur-[200px] sm:flex')}
-		></div>
+		{#if hasProfilePicture}
+			<img
+				src={card.profilePicture}
+				alt={card.displayName}
+				class="pointer-events-none absolute hidden h-screen w-full scale-105 object-cover opacity-70 filter sm:flex"
+			/>
+			<div
+				class={cn('pointer-events-none absolute hidden h-screen w-full backdrop-blur-[200px] sm:flex')}
+			></div>
+		{:else}
+			<div
+				class="pointer-events-none absolute hidden h-screen w-full sm:flex"
+				style:background={getDesktopBgColor()}
+			></div>
+		{/if}
 	{/if}
 
 	<Logo className="absolute right-6 top-6 hidden sm:flex" iconClass="w-8 h-8" />
@@ -368,7 +389,7 @@
 	<div class="flex w-full flex-col items-center scroll-smooth sm:h-screen sm:overflow-auto sm:pt-10">
 
 		<main class={cn(
-			"relative flex h-auto w-full flex-col sm:max-w-[48rem] sm:rounded-xl sm:mb-10",
+			"relative flex min-h-screen h-auto w-full flex-col sm:min-h-0 sm:max-w-[48rem] sm:rounded-xl sm:mb-10",
 			"sm:shadow-[0_0_60px_-15px_rgba(0,0,0,0.3)]"
 		)}>
 			<!-- Desktop only: Create your card button -->
@@ -400,6 +421,7 @@
 
 					<!-- Circular Profile Photo -->
 					<div class="relative mt-8">
+					{#if hasProfilePicture}
 						<!-- Desktop photo -->
 						<img
 							bind:this={imgEl}
@@ -429,6 +451,28 @@
 								imgLoading = false;
 							}}
 						/>
+					{:else}
+						<!-- Placeholder avatar (no profile picture) -->
+						<div
+							class="profile-photo-circle shadow-lg hidden sm:flex items-center justify-center"
+							style="width: {styleConfig.circularProfilePhotoSize}px; height: {styleConfig.circularProfilePhotoSize}px; background: {coloredBg ? (textColor === 'black' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)') : '#E5E7EB'};"
+							bind:this={imgEl}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="{Math.round(styleConfig.circularProfilePhotoSize * 0.4)}" height="{Math.round(styleConfig.circularProfilePhotoSize * 0.4)}" viewBox="0 0 24 24" fill="none" stroke="{coloredBg ? (textColor === 'black' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)') : '#9CA3AF'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+								<circle cx="12" cy="7" r="4"/>
+							</svg>
+						</div>
+						<div
+							class="profile-photo-circle shadow-lg flex sm:hidden items-center justify-center"
+							style="width: {cardStyleType === 'minimal' ? Math.round(styleConfig.circularProfilePhotoSize * 0.82) : styleConfig.circularProfilePhotoSize}px; height: {cardStyleType === 'minimal' ? Math.round(styleConfig.circularProfilePhotoSize * 0.82) : styleConfig.circularProfilePhotoSize}px; background: {coloredBg ? (textColor === 'black' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)') : '#E5E7EB'};"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="{Math.round((cardStyleType === 'minimal' ? styleConfig.circularProfilePhotoSize * 0.82 : styleConfig.circularProfilePhotoSize) * 0.4)}" height="{Math.round((cardStyleType === 'minimal' ? styleConfig.circularProfilePhotoSize * 0.82 : styleConfig.circularProfilePhotoSize) * 0.4)}" viewBox="0 0 24 24" fill="none" stroke="{coloredBg ? (textColor === 'black' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)') : '#9CA3AF'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+								<circle cx="12" cy="7" r="4"/>
+							</svg>
+						</div>
+					{/if}
 
 						<!-- Company Logo on Profile (Pro/Minimal) -->
 						{#if !isCardPersonal && card.companyLogo && styleConfig.companyLogoPosition === 'coverBottomRight'}
@@ -561,6 +605,7 @@
 			<!-- ORIGINAL, COVER, CLASSIC STYLES: Full Cover Image Layout -->
 			{:else}
 				<section class="relative">
+				{#if hasProfilePicture}
 					<!-- Desktop image -->
 					<img
 						bind:this={imgEl}
@@ -597,6 +642,28 @@
 							imgLoading = false;
 						}}
 					/>
+				{:else}
+					<!-- Placeholder cover (no profile picture) -->
+					<div
+						bind:this={imgEl}
+						class="hidden w-full sm:flex sm:rounded-t-[1.25rem] items-center justify-center"
+						style="height: {getCoverHeight()}; background: {coloredBg ? argbToHex(coloredBg) : '#E5E7EB'};"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="{coloredBg ? (textColor === 'black' ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)') : '#9CA3AF'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+							<circle cx="12" cy="7" r="4"/>
+						</svg>
+					</div>
+					<div
+						class="flex w-full sm:hidden items-center justify-center"
+						style="height: {getCoverHeightMobile()}; background: {coloredBg ? argbToHex(coloredBg) : '#E5E7EB'};"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="{coloredBg ? (textColor === 'black' ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)') : '#9CA3AF'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+							<circle cx="12" cy="7" r="4"/>
+						</svg>
+					</div>
+				{/if}
 
 					<div class="absolute top-5 flex w-full items-center justify-between px-4 sm:justify-center">
 						<!-- Logo (left) on mobile -->
@@ -688,7 +755,7 @@
 			<!-- Content Area -->
 			<div
 				class={cn(
-					'relative flex w-full flex-col justify-between',
+					'relative flex w-full flex-1 flex-col justify-between',
 					cardStyleType === 'original' && '-mt-10 md:-mt-12'
 				)}
 			>
@@ -773,7 +840,7 @@
 				<div
 					bind:this={cardScrollElement}
 					class={cn(
-						'flex h-full w-full flex-col justify-between px-5 py-6 sm:px-16 sm:py-10',
+						'flex h-full w-full flex-1 flex-col justify-between px-5 py-6 sm:px-16 sm:py-10',
 						cardStyleType === 'original' && 'rounded-t-[1.25rem] md:rounded-t-[1.875rem]',
 						(cardStyleType === 'original' || cardStyleType === 'cover') && 'sm:rounded-b-xl'
 					)}
