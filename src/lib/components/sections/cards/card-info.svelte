@@ -64,17 +64,19 @@
 	<div class="flex items-center gap-4 md:gap-5">
 		<div class="flex flex-1 flex-col justify-center gap-1 md:gap-[0.5625rem]">
 			<h1 class="card-info-name font-inter">{title}</h1>
-			<span class="card-info-desc font-inter">{heading}</span>
+			{#if heading}
+				<span class="card-info-desc font-inter">{heading}</span>
+			{/if}
 			{#if bio}
 				<p class="card-info-bio font-inter opacity-80">{bio}</p>
 			{/if}
 		</div>
 
-		{#if !isCardPersonal && companyLogo}
+		{#if companyLogo}
 			{@const LogoWrapper = companyLink ? 'a' : 'div'}
 			<svelte:element
 				this={LogoWrapper}
-				href={companyLink ? `//${companyLink}` : undefined}
+				href={companyLink ? (companyLink.startsWith('http') ? companyLink : `//${companyLink}`) : undefined}
 				target={companyLink ? '_blank' : undefined}
 				class="card-info-logo flex-shrink-0 self-center rounded-full border-white"
 			>
@@ -93,7 +95,7 @@
 		{/if}
 	</div>
 
-	{#if !isCardPersonal && skills && skills.length !== 0}
+	{#if skills && skills.length !== 0}
 		<div class="mt-4 flex flex-wrap gap-2">
 			{#each skills as skill}
 				<Badge class="rounded-[1.25rem] bg-white/25 px-3 py-1.5 text-xs leading-3 text-white backdrop-blur-[2px]">

@@ -229,18 +229,20 @@
 		return '';
 	};
 
-	// Get heading text based on card type
+	// Get heading text: use heading if set, otherwise build from jobTitle/company
 	const getHeadingText = () => {
-		if (isCardPersonal) return card.heading;
+		if (card.heading) return card.heading;
 
-		switch (card.professionalCardType) {
-			case 'student':
-				return `${card.schoolMajor} at ${card.schoolName}`;
-			case 'staff':
-				return `${card.jobTitle} at ${card.company}`;
-			default:
-				return card.heading;
-		}
+		const title = card.jobTitle || '';
+		const company = card.company || '';
+		if (title && company) return `${title} at ${company}`;
+		return title || company || '';
+	};
+
+	// Normalize URL: ensure it has a protocol
+	const normalizeUrl = (url: string) => {
+		if (url.startsWith('http://') || url.startsWith('https://')) return url;
+		return `//${url}`;
 	};
 
 	// Determine if we should show circular profile
@@ -279,8 +281,8 @@
 	<meta property="og:type" content="website" />
 	<meta
 		property="og:title"
-		content={!isCardPersonal && card.professionalCardType === 'staff'
-			? `${card.displayName} - ${card.jobTitle} at ${card.company}`
+		content={getHeadingText()
+			? `${card.displayName} - ${getHeadingText()}`
 			: `${card.displayName}`}
 	/>
 	<meta property="og:image:width" content="221" />
@@ -294,8 +296,8 @@
 	<meta property="twitter:url" content={`https://swapp.fr/${params}`} />
 	<meta
 		name="twitter:title"
-		content={!isCardPersonal && card.professionalCardType === 'staff'
-			? `${card.displayName} - ${card.jobTitle} at ${card.company}`
+		content={getHeadingText()
+			? `${card.displayName} - ${getHeadingText()}`
 			: `${card.displayName}`}
 	/>
 	<meta name="twitter:description" content="Swapp - Digital cards" />
@@ -463,10 +465,10 @@
 					{/if}
 
 						<!-- Company Logo on Profile (Pro/Minimal) -->
-						{#if !isCardPersonal && card.companyLogo && styleConfig.companyLogoPosition === 'coverBottomRight'}
+						{#if card.companyLogo && styleConfig.companyLogoPosition === 'coverBottomRight'}
 							<div class="absolute -bottom-2 -right-2">
 								{#if card.companyLink}
-									<a href={`//${card.companyLink}`} target="_blank">
+									<a href={normalizeUrl(card.companyLink)} target="_blank">
 										<img
 											src={card.companyLogo}
 											alt={card.company}
@@ -502,12 +504,14 @@
 							>
 								{card.displayName}
 							</h1>
-							<p
-								class="mt-1"
-								style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px; opacity: {styleConfig.descOpacity};"
-							>
-								{getHeadingText()}
-							</p>
+							{#if getHeadingText()}
+								<p
+									class="mt-1"
+									style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px; opacity: {styleConfig.descOpacity};"
+								>
+									{getHeadingText()}
+								</p>
+							{/if}
 
 							{#if card.bio}
 								<p
@@ -518,7 +522,7 @@
 								</p>
 							{/if}
 
-							{#if !isCardPersonal && card.keySkills && card.keySkills.length > 0}
+							{#if card.keySkills && card.keySkills.length > 0}
 								<div class="mt-4 flex flex-wrap justify-center gap-2">
 									{#each card.keySkills as skill}
 										<Badge
@@ -555,20 +559,22 @@
 							>
 								{card.displayName}
 							</h1>
-							<!-- Desktop heading -->
-							<p
-								class="mt-2 opacity-70 hidden sm:block"
-								style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
-							>
-								{getHeadingText()}
-							</p>
-							<!-- Mobile heading (-1px) -->
-							<p
-								class="mt-2 opacity-70 sm:hidden"
-								style="font-size: {styleConfig.descFontSize - 1}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
-							>
-								{getHeadingText()}
-							</p>
+							{#if getHeadingText()}
+								<!-- Desktop heading -->
+								<p
+									class="mt-2 opacity-70 hidden sm:block"
+									style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
+								>
+									{getHeadingText()}
+								</p>
+								<!-- Mobile heading (-1px) -->
+								<p
+									class="mt-2 opacity-70 sm:hidden"
+									style="font-size: {styleConfig.descFontSize - 1}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
+								>
+									{getHeadingText()}
+								</p>
+							{/if}
 
 							{#if card.bio}
 								<!-- Desktop bio (70%) -->
@@ -703,12 +709,14 @@
 							>
 								{card.displayName}
 							</h1>
-							<p
-								class="mt-2 text-center"
-								style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; opacity: {styleConfig.descOpacity};"
-							>
-								{getHeadingText()}
-							</p>
+							{#if getHeadingText()}
+								<p
+									class="mt-2 text-center"
+									style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; opacity: {styleConfig.descOpacity};"
+								>
+									{getHeadingText()}
+								</p>
+							{/if}
 							{#if card.bio}
 								<p
 									class="mt-4 max-w-md text-center opacity-70"
@@ -760,17 +768,19 @@
 								>
 									{card.displayName}
 								</h1>
-								<p
-									class="mt-2 text-black/70 dark:text-white/70"
-									style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
-								>
-									{getHeadingText()}
-								</p>
+								{#if getHeadingText()}
+									<p
+										class="mt-2 text-black/70 dark:text-white/70"
+										style="font-size: {styleConfig.descFontSize}px; font-weight: {styleConfig.descFontWeight}; letter-spacing: {styleConfig.descLetterSpacing}px;"
+									>
+										{getHeadingText()}
+									</p>
+								{/if}
 							</div>
 
-							{#if !isCardPersonal && card.companyLogo}
+							{#if card.companyLogo}
 								{#if card.companyLink}
-									<a href={`//${card.companyLink}`} target="_blank" class="flex-shrink-0 self-start">
+									<a href={normalizeUrl(card.companyLink)} target="_blank" class="flex-shrink-0 self-start">
 										<img
 											src={card.companyLogo}
 											alt={card.company}
@@ -798,7 +808,7 @@
 							</p>
 						{/if}
 
-						{#if !isCardPersonal && card.keySkills && card.keySkills.length > 0}
+						{#if card.keySkills && card.keySkills.length > 0}
 							<div class="mt-5 flex flex-wrap gap-2">
 								{#each card.keySkills as skill}
 									<Badge class="rounded-[1.25rem] bg-gray-100 px-3 py-1.5 text-xs text-gray-800 dark:bg-white/10 dark:text-white">

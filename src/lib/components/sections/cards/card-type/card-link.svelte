@@ -43,9 +43,17 @@
 		return '';
 	});
 
-	const noAtPrefixSources = ['Whatsapp number', 'Link', 'Cashapp', 'Google Business'];
+	// Only show @ for social platforms that use usernames
+	const atPrefixSources = [
+		'Instagram', 'X', 'TikTok', 'Snapchat', 'Threads', 'Twitter',
+		'Facebook', 'LinkedIn', 'Pinterest', 'Reddit', 'Tumblr',
+		'Twitch', 'YouTube', 'Vimeo', 'Github', 'Gitlab',
+		'Behance', 'Dribbble', 'Medium', 'Quora', 'Discord',
+		'Telegram', 'Signal', 'Clubhouse', 'VSCO', 'Strava',
+		'Spotify', 'Soundcloud', 'VK', 'Kik', 'Line'
+	];
 	const haveAt = $derived(
-		!noAtPrefixSources.includes(src) && link ? '@' : ''
+		atPrefixSources.some(s => s.toLowerCase() === src.toLowerCase()) && detail ? '@' : ''
 	);
 
 	const displayTitle = $derived(customTitle || customName || (src === 'Link' ? detail : src));
