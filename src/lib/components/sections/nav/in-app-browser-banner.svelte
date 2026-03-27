@@ -12,21 +12,27 @@
 	const translations = {
 		en: {
 			openIn: 'Open in browser',
-			copied: 'Link copied!',
-			betterExperience: 'For a better experience, open this page in your browser',
-			dismiss: 'Continue here'
+			copyLink: 'Copy link',
+			copied: 'Copied! Paste in Safari',
+			betterExperience: 'Open in your browser for the full experience',
+			dismiss: 'Continue here',
+			howTo: 'You can also tap ••• above then "Open in browser"'
 		},
 		fr: {
 			openIn: 'Ouvrir dans le navigateur',
-			copied: 'Lien copie !',
-			betterExperience: 'Pour une meilleure experience, ouvrez cette page dans votre navigateur',
-			dismiss: 'Continuer ici'
+			copyLink: 'Copier le lien',
+			copied: 'Copie ! Collez dans Safari',
+			betterExperience: 'Ouvrez dans votre navigateur pour une meilleure experience',
+			dismiss: 'Continuer ici',
+			howTo: 'Vous pouvez aussi appuyer sur ••• puis "Ouvrir dans le navigateur"'
 		},
 		es: {
 			openIn: 'Abrir en el navegador',
-			copied: 'Enlace copiado!',
-			betterExperience: 'Para una mejor experiencia, abre esta pagina en tu navegador',
-			dismiss: 'Continuar aqui'
+			copyLink: 'Copiar enlace',
+			copied: 'Copiado! Pega en Safari',
+			betterExperience: 'Abre en tu navegador para la experiencia completa',
+			dismiss: 'Continuar aqui',
+			howTo: 'Tambien puedes tocar ••• y luego "Abrir en el navegador"'
 		}
 	};
 
@@ -51,12 +57,13 @@
 		return null;
 	}
 
-	async function copyToClipboard(text: string) {
+	async function copyToClipboard() {
+		const url = window.location.href;
 		try {
-			await navigator.clipboard.writeText(text);
+			await navigator.clipboard.writeText(url);
 		} catch {
 			const ta = document.createElement('textarea');
-			ta.value = text;
+			ta.value = url;
 			ta.style.position = 'fixed';
 			ta.style.opacity = '0';
 			document.body.appendChild(ta);
@@ -65,7 +72,7 @@
 			document.body.removeChild(ta);
 		}
 		copied = true;
-		setTimeout(() => { copied = false; }, 2000);
+		setTimeout(() => { copied = false; }, 3000);
 	}
 
 	function openInBrowser() {
@@ -73,7 +80,7 @@
 		const strippedUrl = url.replace(/^https?:\/\//, '');
 
 		if (isAndroid) {
-			// Android: intent:// to open in Chrome, then fallback to default browser
+			// Android: intent:// works reliably
 			window.location.href = `intent://${strippedUrl}#Intent;scheme=https;package=com.android.chrome;end`;
 			setTimeout(() => {
 				window.location.href = `intent://${strippedUrl}#Intent;scheme=https;end`;
@@ -81,20 +88,9 @@
 			return;
 		}
 
-		// iOS: try multiple schemes to escape the in-app webview
-		// 1. x-safari-https:// works on recent iOS versions
-		window.location.href = `x-safari-https://${strippedUrl}`;
-
-		// 2. Fallback: googlechrome:// if Safari scheme didn't work
-		setTimeout(() => {
-			// If we're still here, Safari scheme didn't work - try Chrome
-			window.location.href = `googlechromes://${strippedUrl}`;
-		}, 500);
-
-		// 3. Last fallback: copy to clipboard
-		setTimeout(() => {
-			copyToClipboard(url);
-		}, 1200);
+		// iOS: no reliable way to force Safari open from a webview.
+		// Copy the link and guide the user.
+		copyToClipboard();
 	}
 
 	onMount(() => {
@@ -111,7 +107,6 @@
 	<div class="fixed top-0 left-0 right-0 z-[100] animate-slideDown">
 		<div class="mx-3 mt-3 flex flex-col gap-3 rounded-2xl bg-[#1a1a1a] p-4 shadow-2xl shadow-black/40 backdrop-blur-xl">
 			<div class="flex items-start gap-3">
-				<!-- Browser icon -->
 				<div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/10">
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="12" cy="12" r="10"/>
@@ -121,6 +116,9 @@
 				</div>
 				<div class="flex-1">
 					<p class="text-sm font-medium text-white">{t.betterExperience}</p>
+					{#if !isAndroid}
+						<p class="mt-1 text-xs text-white/40">{t.howTo}</p>
+					{/if}
 				</div>
 			</div>
 
@@ -144,8 +142,10 @@
 							</svg>
 							{t.copied}
 						</span>
-					{:else}
+					{:else if isAndroid}
 						{t.openIn}
+					{:else}
+						{t.copyLink}
 					{/if}
 				</button>
 			</div>

@@ -1,10 +1,14 @@
 {
   "applinks": {
-    "apps": [],
     "details": [
       {
-        "appID": "L4UM433BAX.com.swapp.app.ios",
-        "paths": ["*"]
+        "appIDs": ["L4UM433BAX.com.swapp.app.ios"],
+        "components": [
+          {
+            "/": "/*",
+            "comment": "Match all paths"
+          }
+        ]
       }
     ]
   }
