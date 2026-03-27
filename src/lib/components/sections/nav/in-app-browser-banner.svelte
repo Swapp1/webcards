@@ -5,21 +5,26 @@
 
 	let showBanner = $state(false);
 	let dismissed = $state(false);
+	let copied = $state(false);
 	let appName = $state('');
+	let isAndroid = $state(false);
 
 	const translations = {
 		en: {
 			openIn: 'Open in browser',
+			copied: 'Link copied!',
 			betterExperience: 'For a better experience, open this page in your browser',
 			dismiss: 'Continue here'
 		},
 		fr: {
 			openIn: 'Ouvrir dans le navigateur',
+			copied: 'Lien copie !',
 			betterExperience: 'Pour une meilleure experience, ouvrez cette page dans votre navigateur',
 			dismiss: 'Continuer ici'
 		},
 		es: {
 			openIn: 'Abrir en el navegador',
+			copied: 'Enlace copiado!',
 			betterExperience: 'Para una mejor experiencia, abre esta pagina en tu navegador',
 			dismiss: 'Continuar aqui'
 		}
@@ -46,34 +51,57 @@
 		return null;
 	}
 
+	async function copyToClipboard(text: string) {
+		try {
+			await navigator.clipboard.writeText(text);
+		} catch {
+			const ta = document.createElement('textarea');
+			ta.value = text;
+			ta.style.position = 'fixed';
+			ta.style.opacity = '0';
+			document.body.appendChild(ta);
+			ta.select();
+			document.execCommand('copy');
+			document.body.removeChild(ta);
+		}
+		copied = true;
+		setTimeout(() => { copied = false; }, 2000);
+	}
+
 	function openInBrowser() {
 		const url = window.location.href;
+		const strippedUrl = url.replace(/^https?:\/\//, '');
 
-		// Try intent:// for Android
-		if (/android/i.test(navigator.userAgent)) {
-			window.location.href = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;end`;
+		if (isAndroid) {
+			// Android: intent:// to open in Chrome, then fallback to default browser
+			window.location.href = `intent://${strippedUrl}#Intent;scheme=https;package=com.android.chrome;end`;
+			setTimeout(() => {
+				window.location.href = `intent://${strippedUrl}#Intent;scheme=https;end`;
+			}, 500);
 			return;
 		}
 
-		// iOS: Try using a trick to open Safari
-		// For Instagram/FB on iOS, window.open sometimes works
-		const w = window.open(url, '_blank');
-		if (!w) {
-			// Fallback: copy URL and alert
-			navigator.clipboard?.writeText(url);
-			const copyMsg = {
-				en: 'Link copied! Paste it in your browser (Safari/Chrome).',
-				fr: 'Lien copie ! Collez-le dans votre navigateur (Safari/Chrome).',
-				es: 'Enlace copiado! Pegalo en tu navegador (Safari/Chrome).'
-			};
-			alert(copyMsg[locale]);
-		}
+		// iOS: try multiple schemes to escape the in-app webview
+		// 1. x-safari-https:// works on recent iOS versions
+		window.location.href = `x-safari-https://${strippedUrl}`;
+
+		// 2. Fallback: googlechrome:// if Safari scheme didn't work
+		setTimeout(() => {
+			// If we're still here, Safari scheme didn't work - try Chrome
+			window.location.href = `googlechromes://${strippedUrl}`;
+		}, 500);
+
+		// 3. Last fallback: copy to clipboard
+		setTimeout(() => {
+			copyToClipboard(url);
+		}, 1200);
 	}
 
 	onMount(() => {
 		const detected = detectInAppBrowser();
 		if (detected) {
 			appName = detected;
+			isAndroid = /android/i.test(navigator.userAgent);
 			showBanner = true;
 		}
 	});
@@ -109,7 +137,16 @@
 					onclick={openInBrowser}
 					class="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black transition-colors active:bg-white/90"
 				>
-					{t.openIn}
+					{#if copied}
+						<span class="flex items-center justify-center gap-1.5">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="20 6 9 17 4 12"/>
+							</svg>
+							{t.copied}
+						</span>
+					{:else}
+						{t.openIn}
+					{/if}
 				</button>
 			</div>
 		</div>
