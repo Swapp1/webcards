@@ -2,20 +2,17 @@
 	import '../app.css';
 	let { children } = $props();
 
+	// Listen for OS dark mode changes (initial check is in app.html to prevent FOUC)
 	$effect(() => {
-		const applyDarkMode = () => {
-			const isDarkModePreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		const mq = window.matchMedia('(prefers-color-scheme: dark)');
+		const onChange = () => {
 			const theme = localStorage.getItem('theme');
-
-			if (theme === 'dark' || (!theme && isDarkModePreferred)) {
-				document.documentElement.classList.add('dark');
-			} else {
-				document.documentElement.classList.remove('dark');
+			if (!theme) {
+				document.documentElement.classList.toggle('dark', mq.matches);
 			}
 		};
-
-		applyDarkMode();
-		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyDarkMode);
+		mq.addEventListener('change', onChange);
+		return () => mq.removeEventListener('change', onChange);
 	});
 </script>
 
@@ -23,11 +20,11 @@
 	<!-- Preconnect to Google Fonts for faster loading -->
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<!-- Load Inter font with variable weight support -->
-	<link
-		href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;420;500;600;700;740;800;900&display=swap"
-		rel="stylesheet"
-	/>
+	<!-- Load Inter variable font (single file covers all weights) - non-blocking via {@html} -->
+	{@html `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap" media="print" onload="this.media='all'" />`}
+	<noscript>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap" rel="stylesheet" />
+	</noscript>
 </svelte:head>
 
 {@render children()}

@@ -2,14 +2,19 @@ import { browser } from '$app/environment';
 
 export type SupportedLocale = 'en' | 'fr' | 'es';
 
+let cachedLocale: SupportedLocale | null = null;
+
 export function getBrowserLocale(): SupportedLocale {
+	if (cachedLocale) return cachedLocale;
 	if (!browser) return 'en';
 
 	const lang = navigator.language.toLowerCase().split('-')[0];
 
-	if (lang === 'fr') return 'fr';
-	if (lang === 'es') return 'es';
-	return 'en';
+	if (lang === 'fr') cachedLocale = 'fr';
+	else if (lang === 'es') cachedLocale = 'es';
+	else cachedLocale = 'en';
+
+	return cachedLocale;
 }
 
 // Lead Capture Sheet translations

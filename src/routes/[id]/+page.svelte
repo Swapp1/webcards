@@ -50,13 +50,21 @@
 
 	// Track card view and open lead capture on mount
 	onMount(() => {
-		// Track the card view
-		trackCardView(
-			card.personalizedLink,
-			card.ownerId,
-			card.type,
-			card.displayName
-		);
+		// Defer analytics to after first paint so it doesn't block rendering
+		const deferAnalytics = () => {
+			trackCardView(
+				card.personalizedLink,
+				card.ownerId,
+				card.type,
+				card.displayName
+			);
+		};
+
+		if ('requestIdleCallback' in window) {
+			requestIdleCallback(deferAnalytics);
+		} else {
+			setTimeout(deferAnalytics, 200);
+		}
 
 		// Open lead capture sheet if enabled
 		if (card.leadCapture && card.ownerId) {
@@ -157,18 +165,6 @@
 		}
 	});
 
-	// Sync window width
-	$effect(() => {
-		const updateWidth = () => {
-			windowWidth = window.innerWidth;
-		};
-
-		updateWidth();
-		window.addEventListener('resize', updateWidth);
-
-		return () => window.removeEventListener('resize', updateWidth);
-	});
-
 	// Apply background colors
 	$effect(() => {
 		const bgColor = getBackgroundColor();
@@ -177,43 +173,35 @@
 		document.body.style.setProperty('--action-drawer', bgColor);
 	});
 
-	// Check scroll & calculate heights
+	// Single consolidated resize handler for all layout calculations
 	$effect(() => {
-		let browserFontSize = 16;
+		const onResize = async () => {
+			windowWidth = window.innerWidth;
 
-		if (typeof window !== 'undefined') {
+			// Update image height
+			if (imgEl) {
+				imgHeight = imgEl.getBoundingClientRect().height;
+			}
+
+			// Recalculate scroll state
+			let browserFontSize = 16;
 			const computedStyle = window.getComputedStyle(document.documentElement);
 			browserFontSize = Number(computedStyle.fontSize.replace('px', ''));
-		}
 
-		topH = (windowWidth >= 768 ? imgHeight - 30 : imgHeight - 24) + 4 * browserFontSize;
+			topH = (windowWidth >= 768 ? imgHeight - 30 : imgHeight - 24) + 4 * browserFontSize;
 
-		const checkScroll = async () => {
 			await tick();
-
 			if (cardScrollElement) {
 				isCardScrollable =
 					Math.round(topH + cardScrollElement.scrollHeight) > Math.round(window.innerHeight);
 			}
 		};
 
-		checkScroll();
-		window.addEventListener('resize', checkScroll);
+		// Run once on init
+		onResize();
 
-		return () => window.removeEventListener('resize', checkScroll);
-	});
-
-	// Update image height on resize
-	$effect(() => {
-		const updateHeight = () => {
-			if (imgEl) {
-				imgHeight = imgEl.getBoundingClientRect().height;
-			}
-		};
-
-		window.addEventListener('resize', updateHeight);
-
-		return () => window.removeEventListener('resize', updateHeight);
+		window.addEventListener('resize', onResize);
+		return () => window.removeEventListener('resize', onResize);
 	});
 
 	// Generate gradient based on style

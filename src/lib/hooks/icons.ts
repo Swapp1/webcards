@@ -1,37 +1,57 @@
-export function getIcons(title: string) {
-    const lightIcons = import.meta.glob('$lib/assets/light-icons/*.svg', { eager: true });
-    const darkIcons = import.meta.glob('$lib/assets/dark-icons/*.svg', { eager: true });
+// Pre-compute icon maps once at module level (not per call)
+const lightIconsRaw = import.meta.glob('$lib/assets/light-icons/*.svg', { eager: true });
+const darkIconsRaw = import.meta.glob('$lib/assets/dark-icons/*.svg', { eager: true });
 
-    const titleKey = title.split(' ').join('_').toLocaleLowerCase()
+// Build lookup maps keyed by normalized title for O(1) access
+const lightIconMap = new Map<string, string>();
+const darkIconMap = new Map<string, string>();
 
-    const lightIconKey = Object.keys(lightIcons).find((key) =>
-        key.includes(titleKey)
-    );
-    const darkIconKey = Object.keys(darkIcons).find((key) =>
-        key.includes(titleKey)
-    );
-
-
-    let light: string = '';
-    let dark: string = '';
-
-    if (lightIconKey) {
-        light = (lightIcons[lightIconKey] as { default: string }).default;
-    }
-
-    if (darkIconKey) {
-        dark = (darkIcons[darkIconKey] as { default: string }).default;
-    }
-
-    return [light, dark];
+for (const [key, mod] of Object.entries(lightIconsRaw)) {
+    const fileName = key.split('/').pop()?.replace('.svg', '').toLowerCase() ?? '';
+    lightIconMap.set(fileName, (mod as { default: string }).default);
 }
 
+for (const [key, mod] of Object.entries(darkIconsRaw)) {
+    const fileName = key.split('/').pop()?.replace('.svg', '').toLowerCase() ?? '';
+    darkIconMap.set(fileName, (mod as { default: string }).default);
+}
 
-export function getAllIcons() {
-    const icons = import.meta.glob('$lib/assets/svg/*.svg', { eager: true });
+// Icon result cache to avoid repeated lookups
+const iconCache = new Map<string, [string, string]>();
 
-    return Object.values(icons).map(icon => (icon as { default: string }).default)
+export function getIcons(title: string): [string, string] {
+    const cached = iconCache.get(title);
+    if (cached) return cached;
 
+    const titleKey = title.split(' ').join('_').toLowerCase();
+
+    // Try exact match first (O(1)), then fallback to includes search
+    let light = lightIconMap.get(titleKey) ?? '';
+    let dark = darkIconMap.get(titleKey) ?? '';
+
+    if (!light) {
+        for (const [key, val] of lightIconMap) {
+            if (key.includes(titleKey)) { light = val; break; }
+        }
+    }
+    if (!dark) {
+        for (const [key, val] of darkIconMap) {
+            if (key.includes(titleKey)) { dark = val; break; }
+        }
+    }
+
+    const result: [string, string] = [light, dark];
+    iconCache.set(title, result);
+    return result;
+}
+
+const allIconsRaw = import.meta.glob('$lib/assets/svg/*.svg', { eager: true });
+let allIconsCache: string[] | null = null;
+
+export function getAllIcons(): string[] {
+    if (allIconsCache) return allIconsCache;
+    allIconsCache = Object.values(allIconsRaw).map(icon => (icon as { default: string }).default);
+    return allIconsCache;
 }
 
 

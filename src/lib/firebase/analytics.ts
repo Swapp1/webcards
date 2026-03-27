@@ -1,5 +1,5 @@
 import { db } from "$lib/config/firebase";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, increment, serverTimestamp, type FieldValue } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, increment, serverTimestamp } from "firebase/firestore";
 import { browser } from "$app/environment";
 
 // Get today's date in YYYY-MM-DD format
@@ -8,8 +8,12 @@ const getDateKey = (): string => {
     return now.toISOString().split('T')[0];
 };
 
+// Cached viewer ID to avoid repeated localStorage reads
+let cachedViewerId: string | null = null;
+
 // Get or create a unique viewer ID stored in localStorage
 export const getViewerId = (): string => {
+    if (cachedViewerId) return cachedViewerId;
     if (!browser) return '';
 
     const VIEWER_ID_KEY = 'swapp_viewer_id';
@@ -20,6 +24,7 @@ export const getViewerId = (): string => {
         localStorage.setItem(VIEWER_ID_KEY, viewerId);
     }
 
+    cachedViewerId = viewerId;
     return viewerId;
 };
 
@@ -29,31 +34,7 @@ const isSelfView = (cardOwnerId: string | undefined, viewerId: string): boolean 
     return cardOwnerId === viewerId;
 };
 
-// Initialize card stats document if it doesn't exist
-const initializeCardStats = async (cardId: string, cardOwnerId: string) => {
-    const statsRef = doc(db, 'card_stats', cardId);
-    const statsDoc = await getDoc(statsRef);
-
-    if (!statsDoc.exists()) {
-        await setDoc(statsRef, {
-            cardOwnerId,
-            totalViews: 0,
-            totalClicks: 0,
-            totalSaves: 0,
-            uniqueViewers: 0,
-            clicksByType: {},
-            viewerIds: [],
-            dailyStats: {},
-            dailyClicksByType: {},
-            lastViewedAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
-    }
-
-    return statsRef;
-};
-
-// Track card view
+// Track card view - single read + single write (optimized from 2 reads + 1 write)
 export const trackCardView = async (
     cardId: string,
     cardOwnerId: string | undefined,
@@ -69,29 +50,40 @@ export const trackCardView = async (
     if (isSelfView(cardOwnerId, viewerId)) return;
 
     try {
-        const statsRef = await initializeCardStats(cardId, cardOwnerId);
+        const statsRef = doc(db, 'card_stats', cardId);
         const statsDoc = await getDoc(statsRef);
         const dateKey = getDateKey();
 
-        const existingData = statsDoc.data();
-        const isNewViewer = !existingData?.viewerIds?.includes(viewerId);
+        if (!statsDoc.exists()) {
+            // Initialize + first view in a single write
+            await setDoc(statsRef, {
+                cardOwnerId,
+                totalViews: 1,
+                totalClicks: 0,
+                totalSaves: 0,
+                uniqueViewers: 1,
+                clicksByType: {},
+                viewerIds: [viewerId],
+                dailyStats: { [dateKey]: { views: 1 } },
+                dailyClicksByType: {},
+                lastViewedAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+        } else {
+            const existingData = statsDoc.data();
+            const isNewViewer = !existingData?.viewerIds?.includes(viewerId);
 
-        // Prepare daily stats update
-        const dailyStatsUpdate: Record<string, FieldValue> = {
-            [`dailyStats.${dateKey}.views`]: increment(1)
-        };
-
-        // Update the stats document
-        await updateDoc(statsRef, {
-            totalViews: increment(1),
-            ...(isNewViewer && {
-                uniqueViewers: increment(1),
-                viewerIds: arrayUnion(viewerId)
-            }),
-            ...dailyStatsUpdate,
-            lastViewedAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
+            await updateDoc(statsRef, {
+                totalViews: increment(1),
+                ...(isNewViewer && {
+                    uniqueViewers: increment(1),
+                    viewerIds: arrayUnion(viewerId)
+                }),
+                [`dailyStats.${dateKey}.views`]: increment(1),
+                lastViewedAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+        }
 
         // Also log to Firebase Analytics if available
         if (typeof window !== 'undefined' && (window as any).gtag) {
